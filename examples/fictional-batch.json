@@ -1,0 +1,114 @@
+{
+  "scenarios": [
+    {
+      "id": "synthetic-groceries",
+      "year": 2026,
+      "cards": [
+        {
+          "id": "fictional-grocery",
+          "name": "Fictional Grocery Cashback Card",
+          "annualFeePaise": 0,
+          "rules": [
+            {
+              "id": "grocery",
+              "category": "groceries",
+              "rateBps": 500,
+              "monthlyCapPaise": 15000
+            },
+            {
+              "id": "default",
+              "category": "*",
+              "rateBps": 100
+            }
+          ]
+        },
+        {
+          "id": "fictional-simple",
+          "name": "Fictional Simple Cashback Card",
+          "annualFeePaise": 0,
+          "rules": [
+            {
+              "id": "grocery",
+              "category": "groceries",
+              "rateBps": 200
+            },
+            {
+              "id": "default",
+              "category": "*",
+              "rateBps": 100
+            }
+          ]
+        }
+      ],
+      "transactions": [
+        {
+          "id": "g1",
+          "month": "2026-01",
+          "category": "groceries",
+          "amountPaise": 100000
+        },
+        {
+          "id": "g2",
+          "month": "2026-02",
+          "category": "groceries",
+          "amountPaise": 200000
+        },
+        {
+          "id": "g3",
+          "month": "2026-02",
+          "category": "utilities",
+          "amountPaise": 50000
+        }
+      ]
+    },
+    {
+      "id": "synthetic-utilities",
+      "year": 2026,
+      "cards": [
+        {
+          "id": "fictional-grocery",
+          "name": "Fictional Grocery Cashback Card",
+          "annualFeePaise": 0,
+          "rules": [
+            {
+              "id": "grocery",
+              "category": "groceries",
+              "rateBps": 500,
+              "monthlyCapPaise": 15000
+            },
+            {
+              "id": "default",
+              "category": "*",
+              "rateBps": 100
+            }
+          ]
+        },
+        {
+          "id": "fictional-simple",
+          "name": "Fictional Simple Cashback Card",
+          "annualFeePaise": 0,
+          "rules": [
+            {
+              "id": "grocery",
+              "category": "groceries",
+              "rateBps": 200
+            },
+            {
+              "id": "default",
+              "category": "*",
+              "rateBps": 100
+            }
+          ]
+        }
+      ],
+      "transactions": [
+        {
+          "id": "u1",
+          "month": "2026-05",
+          "category": "utilities",
+          "amountPaise": 50000
+        }
+      ]
+    }
+  ]
+}
