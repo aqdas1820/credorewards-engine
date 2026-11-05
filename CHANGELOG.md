@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0-alpha.3 (release candidate; not yet published)
+
+- Add deterministic `createBatchReport(scenarios)` with independent annual comparisons and 12 calendar-month summaries per card; keep existing annual reward/fee calculations and ranking semantics.
+- Add `credorewards-batch` CLI and fictional multi-scenario JSON example; reject invalid batches instead of quietly producing partial reports.
+- Add `validateCatalogJsonSchema(value)` through a typed public package subpath, enforcing every validation keyword used by the shipped catalog v1 authoring schema.
+- Combine strict shape checks with runtime Gregorian-date, revision-overlap, uniqueness and domain checks via `credorewards-catalog` CLI and `npm run validate:catalog`.
+- Extend packed npm distribution smoke to exercise new SDK/API/CLI paths and invalid-input failures.
+- Increase automated test coverage from 66 to **100** tests, with the same five Windows/Linux CI matrix jobs and npm 12 compatibility regression.
+- Preserve zero runtime dependencies and fictional-only data; independent issuer verification, statement-cycle math and full generic JSON Schema support remain out of scope.
+- Prepare release metadata for separately authorized GitHub prerelease and npm `next` publication.
+
 ## 0.2.0-alpha.2 (published GitHub and npm prerelease)
 
 - Add `auditCatalogUpdate(previousCatalog, proposedCatalog)` for deterministic review of catalog snapshot transitions.
