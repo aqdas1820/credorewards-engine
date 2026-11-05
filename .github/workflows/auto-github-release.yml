@@ -1,0 +1,107 @@
+name: Automated GitHub prerelease
+
+# Disabled by default. The repository owner must explicitly set
+# CREDOREWARDS_AUTO_GITHUB_RELEASE=true after reviewing release policy.
+# Only a successful push CI on main for the still-current commit can release.
+on:
+  workflow_run:
+    workflows: ['TypeScript CI']
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      ${{ vars.CREDOREWARDS_AUTO_GITHUB_RELEASE == 'true' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    name: Release reviewed alpha only
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exactly the successfully tested main commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Only release a new version from current main
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TESTED_SHA"
+          git fetch --quiet origin main
+          if [[ "$(git rev-parse origin/main)" != "$TESTED_SHA" ]]; then
+            echo "main moved since CI; declining to release an outdated commit."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          VERSION="$(node -p 'require("./package.json").version')"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]]; then
+            echo "Refusing release: not an explicit alpha prerelease version."
+            exit 1
+          fi
+          test "$(head -n 1 docs/RELEASE-NOTES.md)" = "# CredoRewards Engine v$VERSION"
+          TAG="v$VERSION"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "GitHub release $TAG exists; no action required."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG exists without a matching release; refusing to reuse it."
+            exit 1
+          else
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies from lockfile
+        if: steps.gate.outputs.should_release == 'true'
+        run: npm ci --ignore-scripts
+      - name: Validate TypeScript
+        if: steps.gate.outputs.should_release == 'true'
+        run: npm run typecheck
+      - name: Run all tests
+        if: steps.gate.outputs.should_release == 'true'
+        run: npm test
+      - name: Test independent installed npm tarball
+        if: steps.gate.outputs.should_release == 'true'
+        run: npm run test:package
+      - name: Validate synthetic catalog
+        if: steps.gate.outputs.should_release == 'true'
+        run: npm run validate:catalog
+      - name: Build release tarball
+        if: steps.gate.outputs.should_release == 'true'
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          PACKAGE_FILE="$(npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP" | tail -n 1)"
+          test -f "$RUNNER_TEMP/$PACKAGE_FILE"
+          echo "asset=$RUNNER_TEMP/$PACKAGE_FILE" >> "$GITHUB_OUTPUT"
+      - name: Create immutable GitHub prerelease (not npm)
+        if: steps.gate.outputs.should_release == 'true'
+        shell: bash
+        env:
+          TAG: ${{ steps.gate.outputs.tag }}
+          ASSET: ${{ steps.package.outputs.asset }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" "$ASSET" --target "$TESTED_SHA" \
+            --title "CredoRewards Engine $TAG" \
+            --notes-file docs/RELEASE-NOTES.md --prerelease
