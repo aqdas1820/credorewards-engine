@@ -18,7 +18,7 @@
 - Document explicit first-party issuer verification and peer-review process (no issuer terms automatically verified)
 
 ## v0.2 — remaining work after alpha.1
-- JSON schema + input validation contract and batch report output
+- Integrated full JSON Schema validation for user-provided catalogs and batch report output
 - Statement billing cycles and spend tiers
 - Better rate/cap attribution and per-month summaries
 - Actual split-year rewards evaluation with explicitly defined cap and fee semantics
