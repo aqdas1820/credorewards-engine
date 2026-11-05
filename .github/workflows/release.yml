@@ -33,6 +33,8 @@ jobs:
         run: npm test
       - name: Test packaged distribution
         run: npm run test:package
+      - name: Check fictional catalog metadata
+        run: npm run validate:catalog
       - name: Pack distributable
         id: package
         shell: bash
