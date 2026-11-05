@@ -5,18 +5,54 @@
   "type": "module",
   "license": "MIT",
   "private": false,
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
-  "bin": { "credorewards": "./bin/credorewards.mjs" },
-  "files": ["dist", "bin", "README.md", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "credorewards": "./bin/credorewards.mjs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
     "demo": "npm run build && node bin/credorewards.mjs examples/fictional-card.json"
   },
-  "devDependencies": { "typescript": "^5.8.3" },
-  "keywords": ["fintech", "india", "credit-cards", "cashback", "rewards", "sdk", "open-source"]
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "fintech",
+    "india",
+    "credit-cards",
+    "cashback",
+    "rewards",
+    "sdk",
+    "open-source"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aqdas1820/credorewards-engine"
+  },
+  "homepage": "https://github.com/aqdas1820/credorewards-engine#readme",
+  "bugs": {
+    "url": "https://github.com/aqdas1820/credorewards-engine/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  }
 }
