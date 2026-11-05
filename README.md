@@ -1,5 +1,7 @@
 # CredoRewards Engine
 
+[![TypeScript CI](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **A transparent, deterministic credit-card cashback rules SDK for India's fintech builders.**
 
 Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credonomics.in)
@@ -62,6 +64,12 @@ node bin/credorewards.mjs examples/fictional-card.json
 ```
 
 See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+
+## GitHub prerelease
+
+The `0.1.0-alpha.1` starter can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck and 19 automated tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
+
+**No npm package is published by this workflow.** Do not advertise a live npm installation until the package has actually been published and checked. See [release notes](docs/RELEASE-NOTES.md).
 
 ## Ground rules for contributors
 
