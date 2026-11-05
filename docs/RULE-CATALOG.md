@@ -4,6 +4,8 @@ The catalog is a **metadata and review gate** around the existing integer-paise 
 
 **No real issuer terms are bundled.** The only catalog fixture, examples/fictional-catalog.json, is synthetic and marked draft.
 
+The next development branch also proposes a [JSON Schema authoring contract](../schemas/rule-catalog.v1.schema.json) and a [catalog history audit / governance guide](CATALOG-GOVERNANCE.md). They are source-only until a separately reviewed release. The JSON Schema describes structure, while `validateRuleCatalog()` performs date and cross-revision checks; neither authenticates bank sources.
+
 ## Data contract
 
 Each RuleCatalog includes schemaVersion: 1 and an array of CardRuleRevision entries.
