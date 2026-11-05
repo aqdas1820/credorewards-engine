@@ -16,7 +16,7 @@ test('release manifest and lockfile agree on the exact package version', () => {
 });
 
 test('release notes match the candidate and npm tag remains a prerelease', () => {
-  assert.equal(notes.split('\n')[0], '# CredoRewards Engine v' + manifest.version);
+  assert.equal(notes.split(/\r?\n/)[0], '# CredoRewards Engine v' + manifest.version);
   assert.equal(manifest.publishConfig.access, 'public');
   assert.equal(manifest.publishConfig.tag, 'next');
 });
