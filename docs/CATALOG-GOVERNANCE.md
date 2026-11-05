@@ -1,6 +1,6 @@
 # Rule catalog change governance (experimental)
 
-This document describes the catalog governance additions packaged in the **v0.2.0-alpha.2 release candidate**. The last confirmed public npm prerelease remains v0.2.0-alpha.1 until alpha.2 publication is separately completed and verified; do not assume these additions are already in the registry.
+These catalog governance additions are included in the independently verified **public npm v0.2.0-alpha.2 prerelease**, published under the `next` tag. A fresh npm installation confirmed the `auditCatalogUpdate()` API, catalog JSON Schema v1 and Windows CLI.
 
 The only bundled issuer fixture is examples/fictional-catalog.json, using synthetic draft rules. No actual bank sources, rates, or verified issuer terms are included.
 

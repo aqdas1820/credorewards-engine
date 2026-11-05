@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0-alpha.2 (release candidate; not yet published)
+## 0.2.0-alpha.2 (published GitHub and npm prerelease)
 
 - Add `auditCatalogUpdate(previousCatalog, proposedCatalog)` for deterministic review of catalog snapshot transitions.
 - Protect prior revision IDs and cashback terms from silent overwrites, forbid evidence rewrites and review downgrades, and disallow reopening a closed validity period.
@@ -8,7 +8,7 @@
 - Ship a JSON Schema Draft 2020-12 catalog authoring contract through an exported npm package subpath; full schema evaluation is left to an external JSON Schema validator.
 - Add an offline `validate:catalog` command for fictional fixture runtime validation; no issuer authenticity check or network fetch is performed.
 - Add 19 tests for audit transitions, schema metadata and fixture CLI checks (66 total), plus packed npm schema/API smoke tests and CI validation.
-- Prepare the next reviewed GitHub prerelease and manual npm `next` publication without changing existing calculation semantics or adding bank data.
+- Published GitHub prerelease and manual npm `next` version, with independently verified seven API imports, JSON Schema and Windows CLI; financial calculation semantics and synthetic data unchanged.
 
 ## 0.2.0-alpha.1 (published GitHub and npm prerelease)
 
