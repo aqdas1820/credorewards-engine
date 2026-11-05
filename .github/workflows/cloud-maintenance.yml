@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cloud-maintenance.yml'
+      - '.github/dependabot.yml'
+      - 'docs/AUTOMATION.md'
 
 permissions:
   contents: read
@@ -66,7 +71,7 @@ jobs:
   track-health:
     name: Open or close one maintenance failure issue
     needs: verify
-    if: ${{ always() && (needs.verify.result == 'success' || needs.verify.result == 'failure') }}
+    if: ${{ always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && (needs.verify.result == 'success' || needs.verify.result == 'failure') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
