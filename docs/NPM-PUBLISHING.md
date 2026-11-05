@@ -4,6 +4,15 @@ The public package is [@credonomics/rewards-engine](https://www.npmjs.com/packag
 
 The GitHub prerelease and npm publication are **separate**, deliberately manual release gates. Only an authorized maintainer, after reviewed CI, should initiate them. The GitHub workflow never publishes npm.
 
+## Optional unattended cloud publishing (OFF by default)
+
+A separately reviewed [guarded tokenless release setup](AUTOMATED-RELEASE.md) provides two **disabled-by-default** workflows:
+
+- `auto-github-release.yml` creates a GitHub prerelease only for an unused alpha version on the exact green `main` CI commit.
+- `npm-trusted-publish.yml` can then publish the immutable GitHub release tarball to npm under `next` using GitHub-hosted OIDC, **without local PowerShell or long-lived npm credentials**.
+
+They remain inactive until the authorized npm package owner separately configures the exact Trusted Publisher and enables the named GitHub repository variables. Follow the [activation and security guide](AUTOMATED-RELEASE.md); do not claim this account-level authorization happened merely because the workflow files exist. The manual release instructions below remain a fallback. **Never use both release paths for the same GitHub tag or npm version.**
+
 ## 1. Release gates for alpha.3
 
 1. Review and merge the alpha.3 release-preparation PR **only if all five CI jobs pass**. This covers Linux and Windows, Node 24/26, bundled npm and npm 12, and the inherited `allow-scripts` regression.
