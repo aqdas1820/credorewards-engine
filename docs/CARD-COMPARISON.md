@@ -1,12 +1,12 @@
 # Comparing hypothetical credit cards
 
-\`compareCards(cards, transactions, year)\` ranks two or more cards by the **net annual cashback value** from the existing \`calculateRewards\` engine. It is designed for explainable what-if analysis using caller-provided terms.
+`compareCards(cards, transactions, year)` ranks two or more cards by the **net annual cashback value** from the existing `calculateRewards` engine. It is designed for explainable what-if analysis using caller-provided terms.
 
 **No real issuer rates, bank-specific logic or live card catalog are included.** All examples below are fictional.
 
 ## Example
 
-\`\`\`js
+```js
 import { compareCards } from '@credonomics/rewards-engine';
 
 const cards = [
@@ -33,18 +33,18 @@ const result = compareCards(cards, transactions, 2026);
 console.table(result.entries.map(({ rank, cardName, netAnnualValuePaise }) => ({
   rank, cardName, netAnnualValuePaise
 })));
-\`\`\`
+```
 
 For this deliberately minimal input, the premium card earns 5,000 paise and charges a 2,000-paise annual fee, resulting in a 3,000-paise net value. The no-fee card earns 2,000 paise. This is **not a realistic complete-year scenario**; a real annual comparison needs full-year transactions and validated fees.
 
 ## Contract
 
-- \`cards\` must be an array containing at least **two** cards with unique, non-empty IDs.
+- `cards` must be an array containing at least **two** cards with unique, non-empty IDs.
 - Each card is calculated independently against the **same** transactions and year. No spend is divided between cards.
-- Entries sort by \`netAnnualValuePaise\` descending; ties sort by card ID ascending so input order does not change results.
-- Tied cards share the best rank, and \`leaderCardIds\` includes all leaders. Competition ranking is used (1, 1, 3).
-- \`differenceFromLeaderPaise\` is the non-negative gap from the best net value. Values are checked against the JavaScript safe-integer limit.
-- \`entry.calculation\` contains the entire original \`calculateRewards\` result, including transaction-level reasons and assumptions.
+- Entries sort by `netAnnualValuePaise` descending; ties sort by card ID ascending so input order does not change results.
+- Tied cards share the best rank, and `leaderCardIds` includes all leaders. Competition ranking is used (1, 1, 3).
+- `differenceFromLeaderPaise` is the non-negative gap from the best net value. Values are checked against the JavaScript safe-integer limit.
+- `entry.calculation` contains the entire original `calculateRewards` result, including transaction-level reasons and assumptions.
 - Input arrays and objects are not mutated.
 - No “best card for each purchase” or multi-card allocation algorithm is performed.
 
