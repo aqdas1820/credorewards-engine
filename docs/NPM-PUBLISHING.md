@@ -1,22 +1,21 @@
 # npm prerelease runbook
 
-The public package [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine) is independently verified at **`0.2.0-alpha.2` under `next`**. The corresponding [GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.2) is also published. The `latest` npm dist-tag still points to `0.1.0-alpha.1`. A fresh installation verified seven SDK exports, catalog JSON Schema v1, the Windows CLI and an npm audit with zero reported vulnerabilities.
+The public package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). The last independently verified public prerelease is **0.2.0-alpha.2**, published under the npm `next` dist-tag, with matching GitHub prerelease. **0.2.0-alpha.3 is a NEW release candidate; preparing or merging this PR does not publish it.** Never republish alpha.2 or reuse its Git tag.
 
-**NEVER rerun the GitHub release workflow or npm publish for `0.2.0-alpha.2`.** npm package versions and Git release tags are immutable. The prior release is complete; the steps below apply **only after preparing a NEW version** in a separately reviewed release PR.
+The GitHub prerelease and npm publication are **separate**, deliberately manual release gates. Only an authorized maintainer, after reviewed CI, should initiate them. The GitHub workflow never publishes npm.
 
-## Future release gate (new versions only)
+## 1. Release gates for alpha.3
 
-1. Create a feature/release PR, bump `package.json` and both lockfile version fields, update `docs/RELEASE-NOTES.md`, changelog, README and the runbook for the **new, unused** version.
-2. Review tests, package metadata, issuer-data boundaries and package contents. Wait for all five Windows/Linux CI matrix jobs to pass, including npm 12 compatibility, TypeScript, unit tests, offline fictional catalog validation and independently installed tarball smoke tests.
-3. Merge the approved PR into `main`, check a clean source checkout, and verify the new version's Git tag and npm version are **both unused**. Check npm staged/processing status too; an `E404` immediately after an accepted publish is not permission to republish.
-4. Start [Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) **once** on `main` with the approved new version. Confirm its tag points to the intended commit, the run passes and the `.tgz` asset exists. This workflow never publishes npm.
-5. The authorized maintainer separately publishes the **new** version to npm under `next` once, completes browser/2FA authentication privately, then verifies public registry availability and a fresh consumer install. Do not alter `latest` during experimental alpha releases.
+1. Review and merge the alpha.3 release-preparation PR **only if all five CI jobs pass**. This covers Linux and Windows, Node 24/26, bundled npm and npm 12, and the inherited `allow-scripts` regression.
+2. Confirm `package.json`, `package-lock.json` (top-level and `packages[""]`) and `docs/RELEASE-NOTES.md` identify **0.2.0-alpha.3**. The npm `publishConfig.tag` must remain `next`.
+3. From a clean, updated `main` checkout, require **100 automated tests**, `npm run typecheck`, `npm run test:package`, `npm run validate:catalog`, `npm run demo:batch` and `npm pack --dry-run --ignore-scripts` to pass. Packed-package checks must import the batch SDK API, the strict schema validator subpath, and run all three CLI tools, including rejection of invalid input.
+4. Verify `v0.2.0-alpha.3` does **not** exist as a GitHub Release or Git tag. Before npm publication, verify npm `0.2.0-alpha.3` is not published **or staged/processing**. An `E404` immediately after a successful publish is never sufficient to justify retrying.
+5. Keep synthetic fixtures clearly fictional. Neither JSON Schema correctness nor a catalog's `reviewed` label authenticates an issuer or makes these hypothetical annual calculations personalized financial advice.
 
-## Local validation before a new prerelease
-
-From a PowerShell checkout of this repository (not System32):
+### Local source verification (Windows PowerShell)
 
 ```powershell
+Set-Location "C:\Users\Aqdas Shaikh\Downloads\credorewards-engine-starter\credorewards-engine"
 git pull --ff-only origin main
 git status --short
 npm ci
@@ -24,49 +23,69 @@ npm run typecheck
 npm test
 npm run test:package
 npm run validate:catalog
+npm run demo:batch
 npm pack --dry-run --ignore-scripts
 npm pkg get version
 npm whoami
 ```
 
-Confirm a clean working tree and that the version refers to the **new** release candidate. At `0.2.0-alpha.2` there are 66 automated tests, seven JavaScript APIs, a JSON Schema export and the Windows CLI. These counts may change in later releases; do not hardcode them as future guarantees.
+Expect a **clean working tree**, package version `0.2.0-alpha.3`, and 100 passing tests. Only publish with the authorized `credonomics` npm account/package privileges. Never paste OTPs, tokens or authentication URLs into issues.
 
-## Registry-state and stage checks for a future version
+## 2. GitHub prerelease (never npm)
 
-Replace `<NEW_VERSION>` in the following commands with the separately reviewed candidate version; **do not substitute an already published version**:
+Check GitHub Releases/tags for `v0.2.0-alpha.3`. After merge and local verification, initiate [Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) **once** on branch `main`. With authenticated GitHub CLI:
 
 ```powershell
-npm view '@credonomics/rewards-engine@<NEW_VERSION>' version --prefer-online
+gh workflow run release.yml --repo aqdas1820/credorewards-engine --ref main
+```
+
+Verify the workflow succeeds, the new release tag points to the reviewed `main` commit, release notes match `docs/RELEASE-NOTES.md`, and a `.tgz` file is attached. The workflow refuses duplicates. **Do not rerun after success.**
+
+## 3. npm publish (separate authorized action)
+
+Only after a completed GitHub prerelease, check npm:
+
+```powershell
+npm view @credonomics/rewards-engine@0.2.0-alpha.3 version --prefer-online
 npm dist-tag ls @credonomics/rewards-engine
 npm stage list @credonomics/rewards-engine
 ```
 
-The new candidate must be absent from published versions **and** from pending staging before any publish. A previously successful publish can print `+ @credonomics/rewards-engine@...` while the registry still processes the package; never rerun it during this interval even if `npm view` temporarily returns `E404` or a retry gives `E409`. If and only if a genuinely new release has been approved and its registry state verified, the authorized maintainer may run **once**:
+Proceed only if the version is **never previously published** and there is no accepted/staged in-progress publish. A first `E404` before any publishing can be expected. Only the authorized maintainer may run this command **once**:
 
 ```powershell
 npm publish --access public --tag next
 ```
 
-Complete browser authentication privately. Never paste credentials, account tokens, OTPs or browser login URLs into public issues or release notes. After the version is available, use a new temporary directory to install the exact version, import all documented APIs, check the catalog Schema package subpath and execute the CLI.
+Finish browser authentication/2FA privately. A successful accepted response such as `+ @credonomics/rewards-engine@0.2.0-alpha.3` may precede public availability by several minutes. A temporary `E404` or stale `next` tag while processing does **not** mean publishing failed. Never repeat `npm publish` for the staged version, even if a retry would return `E409`.
 
-## Verified release: v0.2.0-alpha.2
-
-These **read-only** commands recheck the already completed release:
+## 4. Verify public npm installation after processing
 
 ```powershell
-npm view @credonomics/rewards-engine@0.2.0-alpha.2 version --prefer-online
+npm view @credonomics/rewards-engine@0.2.0-alpha.3 version --prefer-online
 npm dist-tag ls @credonomics/rewards-engine
 npm stage list @credonomics/rewards-engine
 ```
 
-Expected from the independently verified publication: `0.2.0-alpha.2`, `next: 0.2.0-alpha.2`, and no staged versions. `latest` remains `0.1.0-alpha.1` until an explicitly approved dist-tag decision.
+Only when npm reports `0.2.0-alpha.3`, the `next` tag is `0.2.0-alpha.3`, and the version is no longer staged, create a fresh consumer project:
 
-## Issuer and financial correctness boundary
+```powershell
+$testDir = Join-Path $env:TEMP ("credorewards-public-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $testDir | Out-Null
+Push-Location $testDir
+npm init -y
+npm install @credonomics/rewards-engine@0.2.0-alpha.3 --save-exact
+node --input-type=module -e "import * as sdk from '@credonomics/rewards-engine'; const names=['calculateRewards','compareCards','validateRuleCatalog','resolveCardTerms','resolveAnnualCardTerms','compareCatalogCards','auditCatalogUpdate','createBatchReport']; console.log(Object.fromEntries(names.map(name=>[name,typeof sdk[name]])));"
+node --input-type=module -e "import {validateCatalogJsonSchema} from '@credonomics/rewards-engine/catalog-schema-validator'; console.log('Strict schema validator:', typeof validateCatalogJsonSchema);"
+node -e "const s=require('@credonomics/rewards-engine/schemas/rule-catalog.v1.schema.json'); console.log('Catalog Schema:',s.properties.schemaVersion.const)"
+.\node_modules\.bin\credorewards.cmd --help
+.\node_modules\.bin\credorewards-batch.cmd --help
+.\node_modules\.bin\credorewards-catalog.cmd --help
+Pop-Location
+```
 
-The SDK bundles fictional draft rules only. Neither `reviewed` metadata, evidence URLs, an exported JSON Schema nor the runtime fixture checker authenticates bank documents, reviewers, actual issuer rates, statement-cycle caps or split-year calculations. Do not claim personalized card recommendations based on these fixtures.
+Expected: eight core SDK function exports, one `validateCatalogJsonSchema` function through the dedicated subpath, schema version `1`, and usage text for all three CLIs. Keep npm `latest` unchanged unless an explicit stable-release decision is separately approved.
 
-## Future trusted publishing
+## Future publishing improvements
 
-Before configuring npm [Trusted Publishers](https://docs.npmjs.com/trusted-publishers/), independently review the exact GitHub repository/workflow identity, npm organization/package access, explicit release triggers, `id-token: write` permissions and protected environment approvals. The existing GitHub workflow deliberately has no npm publishing authorization.
-
-References: [npm scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/) and [npm trusted publishers](https://docs.npmjs.com/trusted-publishers/).
+npm Trusted Publishers/OIDC should only be considered after security review of the repository/workflow identity, least-privilege tokens, protected GitHub environments, release gates and npm account permissions. The existing GitHub prerelease workflow intentionally cannot publish to npm.

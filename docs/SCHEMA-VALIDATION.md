@@ -1,8 +1,8 @@
-# Strict catalog schema validation (experimental development feature)
+# Strict catalog schema validation (experimental alpha.3 release candidate)
 
-The feature branch adds `validateCatalogJsonSchema(value)` at the package subpath `@credonomics/rewards-engine/catalog-schema-validator` and a new `credorewards-catalog <catalog.json>` CLI.
+The v0.2.0-alpha.3 release candidate adds `validateCatalogJsonSchema(value)` at the package subpath `@credonomics/rewards-engine/catalog-schema-validator` and a new `credorewards-catalog <catalog.json>` CLI.
 
-**Source-only until a subsequent separately approved and publicly verified npm release.** The last verified npm release is `v0.2.0-alpha.2`, which does not include this validator or command.
+**Source-only until alpha.3 is separately published and independently verified on npm.** The last verified public release, `v0.2.0-alpha.2`, does not include this validator or command.
 
 ## What is enforced
 

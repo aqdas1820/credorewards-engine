@@ -17,11 +17,11 @@
 - Audit history transitions: block silent term overwrites, evidence rewrites, period reopenings and review downgrades
 - Document explicit first-party issuer verification and peer-review process (no issuer terms automatically verified)
 
-## Post-alpha.2 development — not yet released
+## v0.2.0-alpha.3 — release candidate (not yet published)
 - Enforce every validation keyword used by the bundled catalog v1 JSON Schema from a zero-runtime-dependency schema checker and catalog CLI
 - Keep calendar, overlapping revision and evidence provenance domain checks separate from schema shape validation
 - Produce deterministic batch card-comparison reports with per-calendar-month summaries for multiple independent fictional spending scenarios
-- Test both APIs and CLIs via independently installed npm tarballs; these features are not in the published alpha.2 package
+- Test both APIs and CLIs via independently installed npm tarballs; publish only as a new alpha.3 version, never over the already-published alpha.2
 
 ## v0.2 — remaining planned work
 - General-purpose JSON Schema Draft 2020-12 compatibility or use of a vetted schema validation dependency (current implementation supports only the bundled schema contract)
