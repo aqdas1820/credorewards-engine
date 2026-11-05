@@ -1,6 +1,6 @@
 # Rule catalog change governance (experimental)
 
-This document describes the **development-branch proposal** for the next prerelease after npm v0.2.0-alpha.1. The package remains at v0.2.0-alpha.1 during review; these additions are not in that published artifact.
+This document describes the catalog governance additions packaged in the **v0.2.0-alpha.2 release candidate**. The last confirmed public npm prerelease remains v0.2.0-alpha.1 until alpha.2 publication is separately completed and verified; do not assume these additions are already in the registry.
 
 The only bundled issuer fixture is examples/fictional-catalog.json, using synthetic draft rules. No actual bank sources, rates, or verified issuer terms are included.
 

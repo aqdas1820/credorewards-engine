@@ -1,33 +1,37 @@
-# CredoRewards Engine v0.2.0-alpha.1
+# CredoRewards Engine v0.2.0-alpha.2
 
-Third alpha release candidate, following the publicly released `v0.1.0-alpha.2`. The GitHub prerelease workflow and npm publishing are **separate** actions; neither channel should be described as published until its respective release completes.
+This experimental alpha advances the catalog governance features introduced by `v0.2.0-alpha.1`. It does **not** include real bank rewards datasets or verified issuer terms. GitHub prerelease and npm publication are separate steps, verified independently.
 
-## New: dated, review-gated card rule catalog
+## New: catalog change audit
 
-- `validateRuleCatalog(catalog)` validates schema version, distinct revision IDs, rule data, evidence metadata, date ranges, and non-overlapping effective periods for the same card.
-- `resolveCardTerms(catalog, cardId, asOf)` returns the applicable card-rule revision on a calendar date.
-- `resolveAnnualCardTerms(catalog, cardId, year)` requires **one unchanged revision covering the entire calendar year**. It rejects mid-year changes rather than applying inaccurate year-wide rates.
-- `compareCatalogCards(catalog, cardIds, transactions, year)` calculates the existing annual cashback ranking from eligible revisions and returns the chosen revision IDs, review records and evidence metadata.
-- Draft entries are excluded by default and require an explicit `{ allowDraft: true }` option for clearly labeled hypothetical tests.
+- **`auditCatalogUpdate(previousCatalog, proposedCatalog)`** checks both snapshots and returns deterministic, sorted sets of added, closed, promoted, evidence-appended and unchanged revision IDs.
+- Rejects deleting historical revisions or editing a revision's card/issuer identity, start date or cashback terms under an existing revision ID. Changed terms must use a new revision ID.
+- Rejects replacing/removing existing evidence metadata, downgrading recorded review status, rewriting review records or reopening/changing a previously closed effective period.
+- Allows append-only evidence on draft records, one-time closure of an open-ended period and recorded draft-to-reviewed promotion subject to the existing metadata requirements.
+- The audit compares caller-provided snapshots; it is **not** a cryptographically immutable audit log, access-control service, reviewer authenticator or issuer document verification.
 
-The versioned catalog is *infrastructure for source governance*, **not** a validated bank-rate database. A `reviewed` flag is supplied by catalog maintainers; the library neither authenticates reviewers nor fetches/validates the underlying issuer documents.
+## New: JSON Schema and offline fixture validation
 
-## Compatibility and validation
+- Ship `schemas/rule-catalog.v1.schema.json`, a Draft 2020-12 authoring schema for catalog v1, cashback rules, evidence fields and review metadata.
+- The JSON Schema is included in the npm tarball and published under package export `@credonomics/rewards-engine/schemas/rule-catalog.v1.schema.json`.
+- Add `npm run validate:catalog` for the checked-in **fictional draft** catalog. It uses the SDK's runtime `validateRuleCatalog()`, including cross-revision overlaps and calendar validation.
+- **Important distinction:** the offline CLI does not run a full JSON Schema validator; using the exported schema in an external schema validator enables additional authoring constraints such as rejecting unknown fields. Neither validation method confirms that an issuer document is authentic or its terms are correct.
 
-- Existing `calculateRewards()`, `compareCards()` and CLI remain available.
-- Integer-paise arithmetic and annual cap/fee semantics remain unchanged.
-- 47 automated tests (29 existing calculation/comparison tests + 16 catalog tests + 2 release-manifest checks), with installed-tarball checks for reward, comparison, catalog APIs and CLI.
-- CI covers Linux and Windows, npm 12, and Node.js 24/26, including the inherited npm `allow-scripts` configuration regression.
-- A new release-manifest consistency test checks version metadata, lockfile and release notes.
-- Zero runtime dependencies.
+## Compatibility and quality
 
-## Use after npm publication
+- Preserve the existing `calculateRewards()`, `compareCards()`, `validateRuleCatalog()`, `resolveCardTerms()`, `resolveAnnualCardTerms()`, `compareCatalogCards()` and CLI behavior.
+- Add the new `auditCatalogUpdate()` export without introducing a runtime dependency.
+- **66 automated tests** (47 previous + 15 catalog audit + 4 fixture/schema/CLI tests).
+- Validate TypeScript, tests, fictional catalog, independent installed-package API/CLI/schema smoke test and npm packing across 5 Windows/Linux, npm 12 and Node.js 24/26 CI jobs.
+- Financial math remains deterministic in integer paise. There is no statement-cycle, split-year or real-time issuer-rate calculation.
+
+## Installation (after npm publication)
 
 ```bash
-npm install @credonomics/rewards-engine@0.2.0-alpha.1
+npm install @credonomics/rewards-engine@0.2.0-alpha.2
 ```
 
-`@next` will refer to this version **only after** the npm registry reflects a successful authorized publish.
+Or install the `next` dist-tag **after** verifying that it points to this version.
 
 From the source checkout:
 
@@ -36,14 +40,14 @@ npm ci
 npm run typecheck
 npm test
 npm run test:package
+npm run validate:catalog
+npm pack --dry-run
 ```
 
-See [Rule Catalog](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/RULE-CATALOG.md), [Card Comparison](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/CARD-COMPARISON.md) and [npm publishing runbook](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/NPM-PUBLISHING.md).
+Documentation: [Catalog Governance](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/CATALOG-GOVERNANCE.md), [Rule Catalog](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/RULE-CATALOG.md), and [npm release runbook](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/NPM-PUBLISHING.md).
 
-## Financial and security limitations
+## Limitations and release safety
 
-Only fictional rule fixtures are bundled. This alpha has **no independently authenticated real issuer rates**, merchant/MCC mapping, bank integrations, reward-point valuation, GST computation, statement-cycle caps, split-year recalculation, or per-purchase card-allocation optimization. Reviewed metadata is not external certification.
+All bundled card examples are synthetic and remain drafts. Evidence URLs, a `reviewed` label and schema conformance **do not independently verify issuer sources or the economic correctness of rates, eligibility, taxes or fees**. Annual-fee and reward evaluation still assumes a complete calendar year and cannot safely apply mid-year rule changes as one full-year revision. These results are not personalized financial advice.
 
-Annual-fee calculations assume complete-year transaction inputs and supplied fees inclusive of applicable taxes. Do not use hypothetical results as personalized financial advice. Never include account records, card numbers, statements, OTPs or access credentials in bug reports.
-
-**Release gate:** Confirm that `0.2.0-alpha.1` is unused on npm and that `v0.2.0-alpha.1` does not already exist as a Git tag or release. Never reuse an existing published version.
+Avoid account numbers, credentials, payment statements or real customer data in issues and fixtures. An approved maintainer must confirm that GitHub tag `v0.2.0-alpha.2` and npm version `0.2.0-alpha.2` are unused before publishing to each channel; never overwrite or republish an existing version. GitHub prerelease automation does **not** publish to npm.
