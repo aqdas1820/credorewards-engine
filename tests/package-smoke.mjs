@@ -9,15 +9,23 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const temp = mkdtempSync(join(tmpdir(), 'credorewards-package-'));
 const npmCli = process.env.npm_execpath;
 
-function run(command, args, cwd, shell = false) {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', shell });
+function run(command, args, cwd, shell = false, env = process.env) {
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8', shell, env });
   assert.equal(result.status, 0, `${command} ${args.join(' ')} failed:\n${result.stdout}\n${result.stderr}\n${result.error?.message ?? ''}`);
   return result.stdout;
 }
 
 function runNpm(args, cwd) {
-  if (npmCli) return run(process.execPath, [npmCli, ...args], cwd);
-  return run(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, cwd, process.platform === 'win32');
+  // npm 12 may export a user-level allow-scripts policy into npm run's
+  // environment. When forwarded to a nested project-scoped npm install,
+  // npm treats it as a forbidden CLI/env override and raises EALLOWSCRIPTS.
+  // Remove only that inherited override; preserve the user's .npmrc policy
+  // and the --ignore-scripts protection used by this smoke test.
+  const env = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => !/^npm_config_allow[_-]scripts$/i.test(name))
+  );
+  if (npmCli) return run(process.execPath, [npmCli, ...args], cwd, false, env);
+  return run(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, cwd, process.platform === 'win32', env);
 }
 
 try {

@@ -9,14 +9,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        npm-version: [bundled, '12']
+        include:
+          - os: ubuntu-latest
+            node-version: '24'
+            npm-version: bundled
+          - os: ubuntu-latest
+            node-version: '24'
+            npm-version: '12'
+          - os: windows-latest
+            node-version: '24'
+            npm-version: bundled
+          - os: windows-latest
+            node-version: '24'
+            npm-version: '12'
+          - os: windows-latest
+            node-version: '26'
+            npm-version: '12'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - name: Use npm 12
         if: matrix.npm-version == '12'
@@ -26,4 +40,9 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:package
+      - name: Regression — inherited npm allow-scripts policy
+        if: matrix.npm-version == '12'
+        env:
+          npm_config_allow_scripts: synthetic-ci-only-package
+        run: npm run test:package
       - run: npm pack --dry-run --ignore-scripts
