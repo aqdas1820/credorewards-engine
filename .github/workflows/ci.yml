@@ -40,6 +40,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:package
+      - run: npm run validate:catalog
       - name: Regression — inherited npm allow-scripts policy
         if: matrix.npm-version == '12'
         env:
