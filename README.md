@@ -101,7 +101,7 @@ GitHub prereleases are separate from npm publication. **`v0.2.0-alpha.2` is alre
 
 GitHub Actions and Dependabot provide ongoing scheduled SDK checks and dependency-update PRs. The [cloud automation guide](docs/AUTOMATION.md) explains the six-hour maintenance validation, automatic failure/recovery issue tracking and the independently scheduled development task. The automation does **not** require Windows PowerShell to stay open, and cannot claim guaranteed uninterrupted 24/7 operation.
 
-**Release safety:** no workflow added here automatically publishes npm, retags a GitHub release, changes financial rules or bypasses CI. Unattended npm publication requires a separately configured and security-reviewed npm Trusted Publisher (OIDC), not sharing GitHub or npm credentials in chat.
+**Release safety:** the optional [guarded auto-release pipeline](docs/AUTOMATED-RELEASE.md) is **disabled by default**. It can create new GitHub prereleases and publish matching npm `next` versions without PowerShell only **after** the npm owner configures the exact Trusted Publisher (OIDC), enables two repository variables and reviews CI/branch protection. Never share credentials in chat. Existing published versions and Git tags are immutable.
 
 ## Ground rules for contributors
 

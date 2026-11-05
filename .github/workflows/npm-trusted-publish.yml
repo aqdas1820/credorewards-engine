@@ -1,0 +1,151 @@
+name: Tokenless npm prerelease
+
+# Disabled by default. Requires a package-level npm Trusted Publisher for
+# THIS exact filename, plus CREDOREWARDS_AUTO_NPM_PUBLISH=true repo variable.
+# Triggered by successful GitHub prerelease workflows or explicitly dispatched.
+on:
+  workflow_run:
+    workflows: ['Publish GitHub prerelease', 'Automated GitHub prerelease']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Existing GitHub prerelease version (e.g. 0.2.0-alpha.3)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-next
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      ${{ vars.CREDOREWARDS_AUTO_NPM_PUBLISH == 'true' &&
+          ((
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository
+          ) || (
+          github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+          )) }}
+    name: Publish previously validated release tarball through OIDC
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TESTED_SHA: ${{ github.event.workflow_run.head_sha || '' }}
+      REQUESTED_VERSION: ${{ inputs.version || '' }}
+    steps:
+      - name: Checkout the approved release commit or exact release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || format('refs/tags/v{0}', inputs.version) }}
+          fetch-depth: 1
+
+      - name: Set up cloud Node.js for tokenless npm OIDC
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Ensure npm CLI has OIDC publishing support
+        run: npm install --global npm@12
+
+      - name: Verify existing GitHub prerelease and artifact identity
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "$TESTED_SHA" ]]; then
+            test "$(git rev-parse HEAD)" = "$TESTED_SHA"
+          fi
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          VERSION="$(node -p 'require("./package.json").version')"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]]; then
+            echo "Refusing to publish a non-alpha package version."
+            exit 1
+          fi
+          if [[ -n "$REQUESTED_VERSION" && "$REQUESTED_VERSION" != "$VERSION" ]]; then
+            echo "Requested version does not match the reviewed source commit."
+            exit 1
+          fi
+
+          TAG="v$VERSION"
+          [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.prerelease')" == "true" ]]
+          [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.draft')" == "false" ]]
+          [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.author.login')" == "github-actions[bot]" ]]
+
+          git fetch --quiet origin "refs/tags/$TAG:refs/tags/$TAG"
+          [[ "$(git rev-parse "$TAG^{commit}")" == "$SOURCE_SHA" ]] || {
+            echo "Release tag does not point to the successfully tested commit."
+            exit 1
+          }
+
+          gh release download "$TAG" --pattern '*.tgz' --dir "$RUNNER_TEMP"
+          mapfile -t files < <(find "$RUNNER_TEMP" -maxdepth 1 -type f -name '*.tgz')
+          if [[ "${#files[@]}" -ne 1 ]]; then
+            echo "Expected exactly one installable GitHub release tarball."
+            exit 1
+          fi
+          ASSET="${files[0]}"
+          tar -xOf "$ASSET" package/package.json |
+            EXPECTED_NAME='@credonomics/rewards-engine' EXPECTED_VERSION="$VERSION" node -e '
+              let data="";
+              process.stdin.on("data",chunk=>data+=chunk);
+              process.stdin.on("end",()=>{
+                const p=JSON.parse(data);
+                if(p.name!==process.env.EXPECTED_NAME||p.version!==process.env.EXPECTED_VERSION){
+                  throw new Error("Release asset identity mismatch");
+                }
+              });
+            '
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Refuse published versions and unexpected registry errors
+        id: registry
+        env:
+          VERSION: ${{ steps.verify.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          LOOKUP="$(npm view "@credonomics/rewards-engine@$VERSION" version --prefer-online 2>&1)"
+          RC=$?
+          set -e
+          if [[ "$RC" -eq 0 ]]; then
+            echo "Version already public. Nothing to publish."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$LOOKUP" == *E404* ]]; then
+            echo "No published version returned. Checking staged/processing versions requires independent account controls."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "$LOOKUP"
+            echo "Registry lookup failed for a reason other than a missing version."
+            exit 1
+          fi
+
+      - name: Publish signed/provenance npm prerelease with OIDC, once
+        if: steps.registry.outputs.should_publish == 'true'
+        env:
+          RELEASE_TARBALL: ${{ steps.verify.outputs.asset }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm publish "$RELEASE_TARBALL" --access public --tag next
+
+      - name: Document possible post-publish registry processing
+        if: steps.registry.outputs.should_publish == 'true'
+        run: |
+          echo "### npm publish request accepted" >> "$GITHUB_STEP_SUMMARY"
+          echo "The package may be staged/processing before npm view and next dist-tag update." >> "$GITHUB_STEP_SUMMARY"
+          echo "Never retry a version that was already accepted; verify registry independently." >> "$GITHUB_STEP_SUMMARY"
