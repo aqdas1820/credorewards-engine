@@ -17,7 +17,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Annual-fee waivers with separate qualifying-spend exclusions
 - Transaction-by-transaction explanations and a net annual value estimate
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
-- Experimental dated rule-catalog metadata, provenance and review-gated version resolution (development branch; not in published alpha.2)
+- Experimental dated rule-catalog metadata, provenance and review-gated version resolution (candidate API for v0.2.0-alpha.1)
 - Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
 
 ## What it does **not** do (yet)
@@ -34,7 +34,7 @@ npm test
 npm run demo
 ```
 
-To use the registry package in another project: `npm install @credonomics/rewards-engine@next`. Run `npm run test:package` from this source repository to verify an independently installed tarball, CLI and ESM import.
+To use the most recently **published** prerelease in another project: `npm install @credonomics/rewards-engine@next`. Do not assume the catalog API is on npm until `v0.2.0-alpha.1` has been published and registry installation verified. Run `npm run test:package` from this source repository to verify an independently installed tarball, CLI and ESM imports.
 
 Or programmatic usage:
 
@@ -69,11 +69,11 @@ See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md
 
 ## npm package status
 
-The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). Version `0.1.0-alpha.1` was initially published with the `next` tag. Version `0.1.0-alpha.2` is published to npm under `next`; the proposed catalog API is **not** in that published version. The source tree remains at the published package version until a separately reviewed release bump. The initial npm normalization warning did not break the published CLI, which was verified through a clean Windows installation. Verify registry metadata and installed behavior for each release. Maintainers: see [npm publishing](docs/NPM-PUBLISHING.md).
+The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). Version `0.1.0-alpha.2` is published to npm under `next` as the last verified release. This repository now prepares **`0.2.0-alpha.1`**, which is a release candidate and **must not be described as published until npm independently confirms it**. Its experimental rule-catalog API is only in source until that publication. Check the npm registry and install the exact version to verify availability. Maintainers: see [npm publishing](docs/NPM-PUBLISHING.md).
 
 ## GitHub prerelease
 
-Each new package version can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, the current unit test suite and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
+Each new package version can be published as a **GitHub prerelease**, separate from npm publication. The next candidate tag is `v0.2.0-alpha.1`; only run the workflow on `main` after reviewing the release PR and confirming this tag is unused. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, the current unit test suite and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
 
 **This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
 
