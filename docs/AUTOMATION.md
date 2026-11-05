@@ -27,7 +27,7 @@ The recommended future way to remove `npm publish` from the owner's PC is npm **
 
 The **npm account owner** must first configure the exact GitHub repository, workflow filename and (if desired) protected GitHub environment as an allowed Trusted Publisher on npmjs.com. This is an account-side security decision and cannot be inferred from repository access. After an explicit release-security review, add a separate workflow with `id-token: write` and a tightly controlled release trigger. Confirm provenance, correct dist-tags, tag immutability, a clean installed consumer, and permission boundaries. Do not combine untrusted PR execution with OIDC publishing credentials.
 
-**Neither this PR nor the newly scheduled ChatGPT task changes the established release gate.** GitHub prerelease tags and npm versions remain intentionally separately authorized. Do not use `latest` for experimental alpha releases.
+The optional [guarded release pipeline](AUTOMATED-RELEASE.md) can automate GitHub prerelease and npm `next` publishing from already reviewed, green `main` commits **only after two explicit repository flags and npm account-level Trusted Publisher authorization have been configured**. Those flags are disabled by default. The scheduled ChatGPT task does not have npm publishing permission or local PC access. Never use `latest` for experimental alpha releases.
 
 ## Operational limits
 
@@ -39,6 +39,7 @@ The **npm account owner** must first configure the exact GitHub repository, work
 ## Operational links
 
 - [Cloud maintenance workflow](https://github.com/aqdas1820/credorewards-engine/actions/workflows/cloud-maintenance.yml)
+- [Guarded release activation guide](AUTOMATED-RELEASE.md)
 - [CI workflow](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml)
 - [Repository issues](https://github.com/aqdas1820/credorewards-engine/issues)
 - [Dependabot docs](https://docs.github.com/en/code-security/concepts/supply-chain-security/about-the-dependabot-yml-file)
