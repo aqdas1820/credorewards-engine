@@ -19,7 +19,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
 - Experimental dated rule-catalog metadata, provenance and review-gated version resolution (published in v0.2.0-alpha.1)
 - Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (published in v0.2.0-alpha.2)
-- Development-only strict bundled catalog-schema validation and multi-scenario monthly batch reports (not on npm until a later release)
+- Strict bundled catalog v1 schema validation and multi-scenario monthly batch reports (in the v0.2.0-alpha.3 release candidate, **not yet published**)
 - Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
 
 ## What it does **not** do (yet)
@@ -37,7 +37,7 @@ npm run validate:catalog
 npm run demo
 ```
 
-To install the independently verified public prerelease in another project, use `npm install @credonomics/rewards-engine@0.2.0-alpha.2` or `npm install @credonomics/rewards-engine@next`. Version `0.2.0-alpha.2` includes `auditCatalogUpdate()`, the exported catalog JSON Schema and CLI. Run `npm run test:package` from this repository to verify a separately installed tarball and its public API, schema and CLI.
+To install the **currently verified public** prerelease, use `npm install @credonomics/rewards-engine@0.2.0-alpha.2` or the current `@next` tag after checking npm. The source package **prepares `0.2.0-alpha.3`**, including `createBatchReport()`, strict schema validation and two new CLIs; these are not on npm until separate release and registry verification. Run `npm run test:package` in the repository to verify the installable candidate tarball.
 
 Or programmatic usage:
 
@@ -68,14 +68,14 @@ npm run build
 node bin/credorewards.mjs examples/fictional-card.json
 ```
 
-See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for source-only batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for candidate batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
 
 
-## Development preview (unpublished)
+## v0.2.0-alpha.3 release candidate (unpublished)
 
-Current development source introduces `createBatchReport(scenarios)`, a `credorewards-batch` CLI and purpose-built JSON Schema v1 validation through `@credonomics/rewards-engine/catalog-schema-validator` and `credorewards-catalog`. These additions are **not** available from the already published `@next` (`0.2.0-alpha.2`) until a separately reviewed release is built and published.
+Source version `0.2.0-alpha.3` includes `createBatchReport(scenarios)`, a `credorewards-batch` CLI and purpose-built JSON Schema v1 validation via `@credonomics/rewards-engine/catalog-schema-validator` and `credorewards-catalog`. These additions are **not available from the published `0.2.0-alpha.2`** and will reach npm only after separately approved release actions and verification.
 
-From a checkout of this development branch:
+From a source checkout of this release candidate:
 
 ```bash
 npm ci
@@ -89,11 +89,11 @@ The schema evaluator covers every keyword currently used in the shipped catalog 
 
 ## npm package status
 
-The verified public npm prerelease is **`0.2.0-alpha.2`**, published under `next`; `latest` remains **`0.1.0-alpha.1`**. A clean npm installation confirmed all seven JavaScript APIs, catalog JSON Schema v1 and the Windows CLI. This repository has also published the matching [GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.2). To confirm future changes, inspect `npm dist-tag ls @credonomics/rewards-engine` and use an exact version. See [npm publishing](docs/NPM-PUBLISHING.md).
+The most recently **independently verified published** npm prerelease is `0.2.0-alpha.2` under `next`; `latest` remains `0.1.0-alpha.1`. The **unpublished candidate `0.2.0-alpha.3`** contains the new batch and schema features. Existing alpha.2 publication is complete; its GitHub tag and npm package version must not be reused. Check `npm dist-tag ls @credonomics/rewards-engine` and install a pinned version to verify later releases. See [npm publishing](docs/NPM-PUBLISHING.md).
 
 ## GitHub prerelease
 
-GitHub prereleases are separate from npm publication. **`v0.2.0-alpha.2` is already released** with a distributable tarball and must never be recreated or retargeted. For a future, separately approved version bump, maintainers can run [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) on reviewed `main` only after checking the **new** version tag is unused. The workflow runs typecheck, tests, installed-package smoke and catalog checks before creating the release and refuses duplicate tags.
+GitHub prereleases are separate from npm publication. **`v0.2.0-alpha.2` is already released** and must never be recreated or retargeted. The proposed next tag is **`v0.2.0-alpha.3`**. Maintainers may run [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) on reviewed, merged `main` only after confirming this tag is unused; the workflow validates and packs the candidate, refuses duplicate tags, and **does not publish npm**.
 
 **This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
 
