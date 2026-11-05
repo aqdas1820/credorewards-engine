@@ -41,13 +41,13 @@ jobs:
       id-token: write
     env:
       GH_TOKEN: ${{ github.token }}
-      TESTED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      TESTED_SHA: ${{ github.event.workflow_run.head_sha || '' }}
       REQUESTED_VERSION: ${{ inputs.version || '' }}
     steps:
-      - name: Checkout the completed GitHub release workflow commit
+      - name: Checkout the approved release commit or exact release tag
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || format('refs/tags/v{0}', inputs.version) }}
           fetch-depth: 1
 
       - name: Set up cloud Node.js for tokenless npm OIDC
@@ -65,7 +65,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$TESTED_SHA"
+          if [[ -n "$TESTED_SHA" ]]; then
+            test "$(git rev-parse HEAD)" = "$TESTED_SHA"
+          fi
+          SOURCE_SHA="$(git rev-parse HEAD)"
           VERSION="$(node -p 'require("./package.json").version')"
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]]; then
             echo "Refusing to publish a non-alpha package version."
@@ -79,9 +82,10 @@ jobs:
           TAG="v$VERSION"
           [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.prerelease')" == "true" ]]
           [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.draft')" == "false" ]]
+          [[ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.author.login')" == "github-actions[bot]" ]]
 
           git fetch --quiet origin "refs/tags/$TAG:refs/tags/$TAG"
-          [[ "$(git rev-parse "$TAG^{commit}")" == "$TESTED_SHA" ]] || {
+          [[ "$(git rev-parse "$TAG^{commit}")" == "$SOURCE_SHA" ]] || {
             echo "Release tag does not point to the successfully tested commit."
             exit 1
           }
