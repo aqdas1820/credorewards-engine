@@ -57,7 +57,7 @@ try {
   assert.match(help, /Usage: credorewards/);
 
   const consumer = join(temp, 'consumer.mjs');
-  writeFileSync(consumer, `import { calculateRewards, compareCards, validateRuleCatalog, resolveAnnualCardTerms, compareCatalogCards } from '@credonomics/rewards-engine';
+  writeFileSync(consumer, `import { calculateRewards, compareCards, validateRuleCatalog, resolveAnnualCardTerms, compareCatalogCards, auditCatalogUpdate } from '@credonomics/rewards-engine';
 const card = { id: 'test', name: 'Test', annualFeePaise: 0,
   excludedCategories: [], rules: [{ id: 'base', category: '*', rateBps: 100 }] };
 const tx = [{ id: '1', month: '2026-01', category: 'utilities', amountPaise: 10000 }];
@@ -76,9 +76,11 @@ validateRuleCatalog(catalog);
 if (resolveAnnualCardTerms(catalog, 'test', 2026, { allowDraft: true }).revisionId !== 'test-2026') process.exit(4);
 const ranked = compareCatalogCards(catalog, ['other', 'test'], tx, 2026, { allowDraft: true });
 if (ranked.comparison.leaderCardIds[0] !== 'test' || ranked.selections[0].revisionId !== 'test-2026') process.exit(5);
+const report = auditCatalogUpdate(catalog, catalog);
+if (report.unchangedRevisionIds.length !== 2) process.exit(6);
 `);
   run(process.execPath, [consumer], temp);
-  console.log('Package smoke test passed: installed CLI, reward, comparison and catalog APIs.');
+  console.log('Package smoke test passed: installed CLI, reward, comparison, catalog and history-audit APIs.');
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
