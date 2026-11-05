@@ -1,0 +1,21 @@
+{
+  "year": 2026,
+  "card": {
+    "id": "demo-card-not-real",
+    "name": "Fictional Demo Cashback Card (NOT a bank product)",
+    "annualFeePaise": 50000,
+    "annualFeeWaiverThresholdPaise": 1000000,
+    "feeWaiverExcludedCategories": ["rent"],
+    "excludedCategories": ["wallet-load", "rent"],
+    "rules": [
+      { "id": "groceries", "category": "groceries", "rateBps": 500, "monthlyCapPaise": 10000 },
+      { "id": "fallback", "category": "*", "rateBps": 100 }
+    ]
+  },
+  "transactions": [
+    { "id": "tx-001", "month": "2026-01", "category": "groceries", "amountPaise": 100000 },
+    { "id": "tx-002", "month": "2026-01", "category": "groceries", "amountPaise": 200000 },
+    { "id": "tx-003", "month": "2026-01", "category": "utilities", "amountPaise": 50000 },
+    { "id": "tx-004", "month": "2026-02", "category": "rent", "amountPaise": 700000 }
+  ]
+}

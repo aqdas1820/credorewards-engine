@@ -1,0 +1,22 @@
+{
+  "name": "@credonomics/rewards-engine",
+  "version": "0.1.0-alpha.1",
+  "description": "Transparent, deterministic India-focused credit card cashback rules engine (fictional examples only)",
+  "type": "module",
+  "license": "MIT",
+  "private": false,
+  "engines": { "node": ">=20" },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "bin": { "credorewards": "./bin/credorewards.mjs" },
+  "files": ["dist", "bin", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "demo": "npm run build && node bin/credorewards.mjs examples/fictional-card.json"
+  },
+  "devDependencies": { "typescript": "^5.8.3" },
+  "keywords": ["fintech", "india", "credit-cards", "cashback", "rewards", "sdk", "open-source"]
+}
