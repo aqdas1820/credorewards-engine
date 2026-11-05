@@ -17,6 +17,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Annual-fee waivers with separate qualifying-spend exclusions
 - Transaction-by-transaction explanations and a net annual value estimate
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
+- Experimental dated rule-catalog metadata, provenance and review-gated version resolution (development branch; not in published alpha.2)
 - Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
 
 ## What it does **not** do (yet)
@@ -64,15 +65,15 @@ npm run build
 node bin/credorewards.mjs examples/fictional-card.json
 ```
 
-See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for the `compareCards()` API and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for the `compareCards()` API, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for experimental provenance metadata, and [ROADMAP.md](docs/ROADMAP.md) for planned work.
 
 ## npm package status
 
-The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). Version `0.1.0-alpha.1` was initially published with the `next` tag. The source tree targets `0.1.0-alpha.2`; check the npm registry before assuming that version is published. The initial npm normalization warning did not break the published CLI, which was verified through a clean Windows installation. Verify registry metadata and installed behavior for each release. Maintainers: see [npm publishing](docs/NPM-PUBLISHING.md).
+The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). Version `0.1.0-alpha.1` was initially published with the `next` tag. Version `0.1.0-alpha.2` is published to npm under `next`; the proposed catalog API is **not** in that published version. The source tree remains at the published package version until a separately reviewed release bump. The initial npm normalization warning did not break the published CLI, which was verified through a clean Windows installation. Verify registry metadata and installed behavior for each release. Maintainers: see [npm publishing](docs/NPM-PUBLISHING.md).
 
 ## GitHub prerelease
 
-Each new package version can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, 29 unit tests and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
+Each new package version can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, the current unit test suite and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
 
 **This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
 
