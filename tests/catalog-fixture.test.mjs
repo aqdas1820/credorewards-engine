@@ -4,6 +4,7 @@ import { readFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { validateRuleCatalog } from '../dist/index.js';
 
 const fixture = JSON.parse(readFileSync(new URL('../examples/fictional-catalog.json', import.meta.url), 'utf8'));
@@ -33,19 +34,16 @@ test('standalone JSON Schema declares types and strict properties for all catalo
   assert.ok(schema.$defs.revision.allOf.length > 0);
 });
 
-test('catalog validation CLI accepts the checked-in synthetic fixture', () => {
-  const result = spawnSync(process.execPath, [script.pathname,
-    new URL('../examples/fictional-catalog.json', import.meta.url).pathname
+test('catalog CLI accepts the checked-in fictional fixture on Windows and Linux', () => {
+  const result = spawnSync(process.execPath, [
+    fileURLToPath(script),
+    fileURLToPath(new URL('../examples/fictional-catalog.json', import.meta.url))
   ], { encoding: 'utf8' });
-  // file-URL paths have different semantics on Windows, so validate via fileURLToPath in the next test.
-  if (process.platform !== 'win32') {
-    assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /valid catalog metadata/);
-  }
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /valid catalog metadata/);
 });
 
-test('offline CLI rejects malformed catalogs and non-JSON inputs', async () => {
-  const { fileURLToPath } = await import('node:url');
+test('offline CLI rejects malformed catalogs and non-JSON inputs', () => {
   const root = mkdtempSync(join(tmpdir(), 'catalog-fixture-test-'));
   try {
     const badCatalog = join(root, 'bad-catalog.json');
