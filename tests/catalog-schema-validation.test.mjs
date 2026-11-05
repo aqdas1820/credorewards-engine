@@ -120,3 +120,19 @@ test('schema errors expose stable JSON pointers', () => {
     issue.instancePath === '/revisions/1/terms/rules/0/rateBps' &&
     issue.keyword === 'minimum'));
 });
+
+test('valid fictional reviewed assertion passes schema and domain metadata checks', () => {
+  const c = clone(fixture);
+  c.revisions[0].evidence = [{
+    url: 'https://example.org/fictional-disclosure',
+    documentTitle: 'Fictional test terms (not real issuer data)',
+    retrievedOn: '2026-01-02',
+    section: 'Synthetic paragraph'
+  }];
+  c.revisions[0].review = {
+    status: 'reviewed', reviewer: 'Synthetic test reviewer',
+    reviewedOn: '2026-01-03'
+  };
+  assert.deepEqual(validateCatalogJsonSchema(c), { valid: true, errors: [] });
+  assert.doesNotThrow(() => validateRuleCatalog(c));
+});
