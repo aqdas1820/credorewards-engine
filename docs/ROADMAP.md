@@ -5,11 +5,17 @@
 - Reward exclusions, caps and annual fee waivers
 - Synthetic test suite and GitHub CI
 
-## v0.2.0-alpha.1 — release candidate (not yet published)
+## v0.2.0-alpha.1 — published prerelease
 - Experimental versioned rule-catalog schema, date applicability checks, provenance metadata and explicit draft/reviewed gate
 - Year-safe catalog-backed card comparison (refuses mid-year rule changes until period-aware math exists)
 - Deterministic net-annual-value comparison across two or more hypothetical cards, with tied rankings and audit details (introduced in v0.1.0-alpha.2)
 - Expanded release validation: 47 automated tests and independently installed npm tarball API smoke tests
+
+## v0.2.0-alpha.2 — development proposal (not yet released)
+- JSON Schema authoring contract for catalogs; still requires runtime cross-revision validation
+- Offline fictional catalog fixture verification in CI and GitHub prerelease workflow
+- Audit history transitions: block silent term overwrites, evidence rewrites, period reopenings and review downgrades
+- Document explicit first-party issuer verification and peer-review process (no issuer terms automatically verified)
 
 ## v0.2 — remaining work after alpha.1
 - JSON schema + input validation contract and batch report output

@@ -1,3 +1,5 @@
+export { auditCatalogUpdate } from './catalog-audit.js';
+export type { CatalogUpdateAudit } from './catalog-audit.js';
 import { resolveAnnualCardTerms } from './catalog.js';
 import type { RuleCatalog, RuleResolveOptions, RuleEvidence, RuleReview } from './catalog.js';
 export { validateRuleCatalog, resolveCardTerms, resolveAnnualCardTerms } from './catalog.js';

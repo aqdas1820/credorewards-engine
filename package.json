@@ -14,7 +14,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./schemas/rule-catalog.v1.schema.json": "./schemas/rule-catalog.v1.schema.json"
   },
   "bin": {
     "credorewards": "bin/credorewards.mjs"
@@ -23,14 +24,16 @@
     "dist",
     "bin",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "schemas"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
     "demo": "npm run build && node bin/credorewards.mjs examples/fictional-card.json",
-    "test:package": "npm run build && node tests/package-smoke.mjs"
+    "test:package": "npm run build && node tests/package-smoke.mjs",
+    "validate:catalog": "npm run build && node scripts/check-catalog.mjs examples/fictional-catalog.json"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
