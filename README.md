@@ -97,6 +97,12 @@ GitHub prereleases are separate from npm publication. **`v0.2.0-alpha.2` is alre
 
 **This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
 
+## Cloud automation (runs without a local PC)
+
+GitHub Actions and Dependabot provide ongoing scheduled SDK checks and dependency-update PRs. The [cloud automation guide](docs/AUTOMATION.md) explains the six-hour maintenance validation, automatic failure/recovery issue tracking and the independently scheduled development task. The automation does **not** require Windows PowerShell to stay open, and cannot claim guaranteed uninterrupted 24/7 operation.
+
+**Release safety:** no workflow added here automatically publishes npm, retags a GitHub release, changes financial rules or bypasses CI. Unattended npm publication requires a separately configured and security-reviewed npm Trusted Publisher (OIDC), not sharing GitHub or npm credentials in chat.
+
 ## Ground rules for contributors
 
 - No unverified bank/card rewards tables or issuer logos.
