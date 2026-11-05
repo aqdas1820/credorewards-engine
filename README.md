@@ -19,6 +19,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
 - Experimental dated rule-catalog metadata, provenance and review-gated version resolution (published in v0.2.0-alpha.1)
 - Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (published in v0.2.0-alpha.2)
+- Development-only strict bundled catalog-schema validation and multi-scenario monthly batch reports (not on npm until a later release)
 - Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
 
 ## What it does **not** do (yet)
@@ -67,7 +68,24 @@ npm run build
 node bin/credorewards.mjs examples/fictional-card.json
 ```
 
-See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for source-only batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+
+
+## Development preview (unpublished)
+
+The `feat/schema-validation-batch-reports` branch introduces `createBatchReport(scenarios)`, a `credorewards-batch` CLI and purpose-built JSON Schema v1 validation through `@credonomics/rewards-engine/catalog-schema-validator` and `credorewards-catalog`. These additions are **not** available from the already published `@next` (`0.2.0-alpha.2`) until a separately reviewed release is built and published.
+
+From a checkout of this development branch:
+
+```bash
+npm ci
+npm test
+npm run test:package
+npm run validate:catalog
+npm run demo:batch
+```
+
+The schema evaluator covers every keyword currently used in the shipped catalog schema but does **not** process arbitrary JSON Schema documents. The batch report compares hypothetical cards independently per scenario and does not optimize card spend allocation. See the linked design docs for financial and provenance boundaries.
 
 ## npm package status
 
