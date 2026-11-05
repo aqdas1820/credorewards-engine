@@ -47,6 +47,13 @@ try {
   assert.equal(metadata.name, sourceManifest.name, 'Installed package name differs from source');
   assert.equal(metadata.version, sourceManifest.version, 'Installed package version differs from source');
   assert.equal(metadata.bin?.credorewards, 'bin/credorewards.mjs', 'CLI mapping missing from package');
+  const schemaPath = join(installedDir, 'schemas', 'rule-catalog.v1.schema.json');
+  assert.ok(existsSync(schemaPath), 'Public JSON Schema missing from installed tarball');
+  const publishedSchema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  assert.equal(publishedSchema.properties?.schemaVersion?.const, 1);
+  assert.equal(metadata.exports?.['./schemas/rule-catalog.v1.schema.json'],
+    './schemas/rule-catalog.v1.schema.json', 'Public schema export missing');
+
 
   const shim = join(temp, 'node_modules', '.bin', process.platform === 'win32'
     ? 'credorewards.cmd'
