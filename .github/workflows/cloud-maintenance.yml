@@ -1,0 +1,95 @@
+name: Cloud SDK maintenance
+
+# Runs on GitHub-hosted runners, independent of any Windows PC.
+# Schedules are best-effort and may be delayed or dropped by the provider.
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloud-sdk-maintenance
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify SDK and packed distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked dependencies without scripts
+        run: npm ci --ignore-scripts
+      - name: Check TypeScript
+        run: npm run typecheck
+      - name: Run entire unit suite
+        run: npm test
+      - name: Smoke-test independently installed package
+        run: npm run test:package
+      - name: Validate fictional catalog and schema
+        run: npm run validate:catalog
+      - name: Check synthetic batch CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          node bin/credorewards-batch.mjs examples/fictional-batch.json > "$RUNNER_TEMP/batch-report.json"
+          REPORT_FILE="$RUNNER_TEMP/batch-report.json" node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const report = JSON.parse(readFileSync(process.env.REPORT_FILE, "utf8"));
+            if (report.reportVersion !== 1 || report.scenarioCount !== 2 ||
+                !report.scenarios.every(s => s.monthlyByCard.every(c => c.months.length === 12))) {
+              throw new Error("Unexpected synthetic batch report structure");
+            }
+            console.log("Batch report schema and month counts verified");
+          '
+      - name: Check npm package contents
+        run: npm pack --dry-run --ignore-scripts
+      - name: Audit installed dependencies for high-severity advisories
+        run: npm audit --audit-level=high
+      - name: Write job summary
+        if: success()
+        shell: bash
+        run: |
+          echo "### Cloud maintenance passed" >> "$GITHUB_STEP_SUMMARY"
+          echo "All tests, packed package, schema, batch report and dependency audit passed." >> "$GITHUB_STEP_SUMMARY"
+          echo "No GitHub release or npm publish was attempted." >> "$GITHUB_STEP_SUMMARY"
+
+  track-health:
+    name: Open or close one maintenance failure issue
+    needs: verify
+    if: ${{ always() && (needs.verify.result == 'success' || needs.verify.result == 'failure') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      RESULT: ${{ needs.verify.result }}
+    steps:
+      - name: Record failed maintenance or recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          title='[automation] Scheduled SDK checks failing'
+          issue="$(gh issue list --repo "$REPO" --state open --limit 100             --json number,title --jq '.[] | select(.title == "[automation] Scheduled SDK checks failing") | .number' | head -n 1)"
+          if [[ "$RESULT" == "failure" ]]; then
+            if [[ -n "$issue" ]]; then
+              gh issue comment "$issue" --repo "$REPO" --body "Scheduled SDK check failed again: $RUN_URL. Review failed job steps before making changes."
+            else
+              gh issue create --repo "$REPO" --title "$title"                 --body "Scheduled SDK maintenance failed: $RUN_URL. This issue was generated automatically. No release or publish was attempted."
+            fi
+          elif [[ -n "$issue" ]]; then
+            gh issue close "$issue" --repo "$REPO"               --comment "Scheduled SDK checks recovered: $RUN_URL. Closing this automated health issue."
+          fi
