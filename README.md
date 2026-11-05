@@ -65,6 +65,10 @@ node bin/credorewards.mjs examples/fictional-card.json
 
 See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics and [ROADMAP.md](docs/ROADMAP.md) for planned work.
 
+## npm package status
+
+**Not yet published to npm.** The planned name `@credonomics/rewards-engine` requires verified control of the `@credonomics` npm scope. Do not use the npm installation/import instructions against the public registry until publication is confirmed. Maintainers: read the [npm publication checklist](docs/NPM-PUBLISHING.md) before any first publish.
+
 ## GitHub prerelease
 
 The `0.1.0-alpha.1` starter can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck and 19 automated tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
