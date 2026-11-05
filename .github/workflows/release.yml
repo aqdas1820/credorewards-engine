@@ -31,6 +31,8 @@ jobs:
         run: npm run typecheck
       - name: Run unit tests
         run: npm test
+      - name: Test packaged distribution
+        run: npm run test:package
       - name: Pack distributable
         id: package
         shell: bash
