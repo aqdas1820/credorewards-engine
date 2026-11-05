@@ -15,6 +15,21 @@ CredoRewards Engine uses **cloud-hosted, event-triggered CI** instead of relying
 - On failure, it creates **one** GitHub issue entitled `[automation] Scheduled SDK checks failing`, or comments with subsequent failed run links. On a later successful run, it closes that same issue. It does not publish releases, merge code, set credentials or restart your PC.
 - `.github/dependabot.yml` asks GitHub to check npm dependencies daily and GitHub Actions dependencies weekly and create reviewable update PRs. These are **not** automatically merged or published.
 
+## Verified main branch integrity gate
+
+The repository's active `Protect main` branch ruleset (**ID 26650702**) targets the default `main` branch and has no bypass actors. GitHub checks confirm the following requirements:
+
+- All changes must go through a pull request; required human approvals are currently **0** to allow low-risk unattended merges.
+- All five `TypeScript CI` matrix jobs must succeed: Ubuntu Node 24 (bundled npm and npm 12), Windows Node 24 (bundled npm and npm 12), and Windows Node 26 (npm 12).
+- Force pushes and branch deletions are blocked, and all review conversations must be resolved.
+- This does **not** replace code review for sensitive changes: maintainers must not autonomously grant production privileges, promote real issuer terms, or override release-policy safeguards.
+
+## First trusted-publishing validation
+
+The npm package owner has configured a GitHub Actions Trusted Publisher for `aqdas1820/credorewards-engine`, workflow `npm-trusted-publish.yml`, with `npm publish` permitted. The connection is **pending its first successful OIDC publication**; the repository cannot infer successful validation from npm's configuration screen.
+
+Repository variables control the two optional release workflows (see [AUTOMATED-RELEASE.md](AUTOMATED-RELEASE.md)). **Adding variables alone does not create a GitHub Actions run**: the automated prerelease waits for a successful `main` push CI, and tokenless npm publishing waits for a successful GitHub release workflow. Verify a new release tag and `next` dist-tag independently before considering activation complete.
+
 ## Why there is no permanent Windows connection
 
 This GitHub-hosted system works even if a Windows desktop is shut down. ChatGPT does **not** have an always-on authenticated shell on the owner's Windows installation, access to local files outside uploads, or persistent remote-control permission. To automate a task that specifically requires Windows desktop apps, a dedicated Windows host, self-hosted GitHub runner or managed remote-desktop environment must first be installed and secured separately. That machine must stay online, and its setup must avoid credential sharing.
