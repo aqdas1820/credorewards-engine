@@ -16,7 +16,7 @@ The versioned catalog is *infrastructure for source governance*, **not** a valid
 
 - Existing `calculateRewards()`, `compareCards()` and CLI remain available.
 - Integer-paise arithmetic and annual cap/fee semantics remain unchanged.
-- 45 unit tests (29 previously available + 16 catalog tests), with installed-tarball checks for reward, comparison, catalog APIs and CLI.
+- 47 automated tests (29 existing calculation/comparison tests + 16 catalog tests + 2 release-manifest checks), with installed-tarball checks for reward, comparison, catalog APIs and CLI.
 - CI covers Linux and Windows, npm 12, and Node.js 24/26, including the inherited npm `allow-scripts` configuration regression.
 - A new release-manifest consistency test checks version metadata, lockfile and release notes.
 - Zero runtime dependencies.
