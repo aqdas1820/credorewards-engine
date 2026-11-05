@@ -8,7 +8,7 @@ const lockfile = json('../package-lock.json');
 const notes = readFileSync(new URL('../docs/RELEASE-NOTES.md', import.meta.url), 'utf8');
 
 test('release manifest and lockfile agree on the exact package version', () => {
-  assert.match(manifest.version, /^\\d+\\.\\d+\\.\\d+-alpha\\.\\d+$/);
+  assert.match(manifest.version, /^\d+\.\d+\.\d+-alpha\.\d+$/);
   assert.equal(lockfile.name, manifest.name);
   assert.equal(lockfile.version, manifest.version);
   assert.equal(lockfile.packages[''].name, manifest.name);
@@ -16,7 +16,7 @@ test('release manifest and lockfile agree on the exact package version', () => {
 });
 
 test('release notes match the candidate and npm tag remains a prerelease', () => {
-  assert.equal(notes.split('\\n')[0], '# CredoRewards Engine v' + manifest.version);
+  assert.equal(notes.split('\n')[0], '# CredoRewards Engine v' + manifest.version);
   assert.equal(manifest.publishConfig.access, 'public');
   assert.equal(manifest.publishConfig.tag, 'next');
 });
