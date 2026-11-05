@@ -98,3 +98,52 @@ test('calculates demo cap and fee correctly', async () => {
   assert.equal(result.annualFeeWaived,false); // rent excluded from fee-waiver spend
   assert.equal(result.netAnnualValuePaise, -39500);
 });
+
+test('rounds each transaction independently before aggregating', () => {
+  const result = calculateRewards(makeCard(), [
+    tx('a', 99), tx('b', 99), tx('c', 100)
+  ], 2026);
+  assert.equal(result.totalRewardsPaise, 1);
+  assert.deepEqual(result.transactions.map(t => t.earnedPaise), [0, 0, 1]);
+  assert.deepEqual(result.transactions.map(t => t.reason), ['rounded_to_zero', 'rounded_to_zero', 'earned']);
+});
+
+test('monthly and annual caps compose at exact boundaries', () => {
+  const card = makeCard({ rules: [{
+    id: 'base', category: '*', rateBps: 10000,
+    monthlyCapPaise: 5, annualCapPaise: 8
+  }] });
+  const result = calculateRewards(card, [
+    tx('a', 5), tx('b', 1), tx('c', 5, '2026-02'),
+    tx('d', 1, '2026-03')
+  ], 2026);
+  assert.equal(result.totalRewardsPaise, 8);
+  assert.deepEqual(result.transactions.map(t => t.earnedPaise), [5, 0, 3, 0]);
+  assert.deepEqual(result.transactions.map(t => t.reason), [
+    'earned', 'reward_cap_reached', 'earned', 'reward_cap_reached'
+  ]);
+});
+
+test('fee waiver is inclusive at the exact qualifying spend threshold', () => {
+  const card = makeCard({
+    annualFeePaise: 250, annualFeeWaiverThresholdPaise: 1000,
+    feeWaiverExcludedCategories: ['rent']
+  });
+  const result = calculateRewards(card, [
+    tx('excluded', 500, '2026-01', 'rent'), tx('eligible', 1000)
+  ], 2026);
+  assert.equal(result.feeWaiverEligibleSpendPaise, 1000);
+  assert.equal(result.annualFeeWaived, true);
+  assert.equal(result.annualFeeChargedPaise, 0);
+  assert.equal(result.netAnnualValuePaise, 15);
+});
+
+test('rejects aggregate paise totals outside safe integer range', () => {
+  const card = makeCard({ rules: [] });
+  assert.throws(
+    () => calculateRewards(card, [
+      tx('a', Number.MAX_SAFE_INTEGER), tx('b', 1)
+    ], 2026),
+    /totalSpendPaise exceeds safe integer range/
+  );
+});
