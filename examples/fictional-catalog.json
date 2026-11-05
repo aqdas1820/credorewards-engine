@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "revisions": [
+    {
+      "revisionId": "fictional-grocery-2026-v1",
+      "issuer": "Fictional Demo Issuer (NOT REAL)",
+      "cardVariant": "Synthetic Grocery Cashback Card",
+      "effectiveFrom": "2026-01-01",
+      "effectiveThrough": "2026-12-31",
+      "terms": {
+        "id": "fictional-grocery",
+        "name": "Fictional Grocery Cashback Card",
+        "annualFeePaise": 0,
+        "rules": [
+          {
+            "id": "grocery",
+            "category": "groceries",
+            "rateBps": 500,
+            "monthlyCapPaise": 15000
+          },
+          {
+            "id": "default",
+            "category": "*",
+            "rateBps": 100
+          }
+        ]
+      },
+      "evidence": [],
+      "review": {
+        "status": "draft",
+        "notes": "Only synthetic demonstration rules. Not reviewed bank terms."
+      }
+    },
+    {
+      "revisionId": "fictional-simple-2026-v1",
+      "issuer": "Fictional Demo Issuer (NOT REAL)",
+      "cardVariant": "Synthetic Simple Cashback Card",
+      "effectiveFrom": "2026-01-01",
+      "effectiveThrough": "2026-12-31",
+      "terms": {
+        "id": "fictional-simple",
+        "name": "Fictional Simple Cashback Card",
+        "annualFeePaise": 0,
+        "rules": [
+          {
+            "id": "grocery",
+            "category": "groceries",
+            "rateBps": 200
+          },
+          {
+            "id": "default",
+            "category": "*",
+            "rateBps": 100
+          }
+        ]
+      },
+      "evidence": [],
+      "review": {
+        "status": "draft",
+        "notes": "Only synthetic demonstration rules. Not reviewed bank terms."
+      }
+    }
+  ]
+}
