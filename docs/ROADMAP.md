@@ -5,14 +5,17 @@
 - Reward exclusions, caps and annual fee waivers
 - Synthetic test suite and GitHub CI
 
-## v0.2
+## v0.2.0-alpha.1 — release candidate (not yet published)
 - Experimental versioned rule-catalog schema, date applicability checks, provenance metadata and explicit draft/reviewed gate
 - Year-safe catalog-backed card comparison (refuses mid-year rule changes until period-aware math exists)
-- Deterministic net-annual-value comparison across two or more hypothetical cards
-- Explicit tied rankings, audit calculations and fee/cap explanations
-- JSON schema + input validation contract, batch report output
+- Deterministic net-annual-value comparison across two or more hypothetical cards, with tied rankings and audit details (introduced in v0.1.0-alpha.2)
+- Expanded release validation: 47 automated tests and independently installed npm tarball API smoke tests
+
+## v0.2 — remaining work after alpha.1
+- JSON schema + input validation contract and batch report output
 - Statement billing cycles and spend tiers
 - Better rate/cap attribution and per-month summaries
+- Actual split-year rewards evaluation with explicitly defined cap and fee semantics
 
 ## v0.3
 - Separately governed human review workflow and actually source-verified issuer datasets (no unverified bank rules)

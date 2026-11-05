@@ -43,6 +43,9 @@ try {
 
   const installedDir = join(temp, 'node_modules', '@credonomics', 'rewards-engine');
   const metadata = JSON.parse(readFileSync(join(installedDir, 'package.json'), 'utf8'));
+  const sourceManifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  assert.equal(metadata.name, sourceManifest.name, 'Installed package name differs from source');
+  assert.equal(metadata.version, sourceManifest.version, 'Installed package version differs from source');
   assert.equal(metadata.bin?.credorewards, 'bin/credorewards.mjs', 'CLI mapping missing from package');
 
   const shim = join(temp, 'node_modules', '.bin', process.platform === 'win32'
