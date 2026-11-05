@@ -121,6 +121,15 @@ if (batch.scenarios[0].monthlyByCard[0].months[0].totalRewardsPaise !== 100) pro
   const catalogOutput = run(process.execPath,
     [join(installedDir, 'bin', 'credorewards-catalog.mjs'), catalogFile], temp);
   assert.match(catalogOutput, /valid catalog metadata/);
+  const malformedCatalog = JSON.parse(readFileSync(catalogFile, 'utf8'));
+  malformedCatalog.revisions[0].terms.unsupported = true;
+  const invalidCatalogFile = join(temp, 'invalid-catalog.json');
+  writeFileSync(invalidCatalogFile, JSON.stringify(malformedCatalog));
+  const invalidCatalog = spawnSync(process.execPath, [
+    join(installedDir, 'bin', 'credorewards-catalog.mjs'), invalidCatalogFile
+  ], { cwd: temp, encoding: 'utf8' });
+  assert.equal(invalidCatalog.status, 1, invalidCatalog.stdout);
+  assert.match(invalidCatalog.stderr, /JSON Schema:.*additionalProperties/);
   const batchFile = join(temp, 'batch-demo.json');
   writeFileSync(batchFile, JSON.stringify({ scenarios: [{
     id: 'fictional-case', year: 2026,
@@ -136,6 +145,13 @@ if (batch.scenarios[0].monthlyByCard[0].months[0].totalRewardsPaise !== 100) pro
   const batchOutput = run(process.execPath,
     [join(installedDir, 'bin', 'credorewards-batch.mjs'), batchFile], temp);
   assert.equal(JSON.parse(batchOutput).scenarios[0].comparison.leaderCardIds[0], 'b');
+  const invalidBatchFile = join(temp, 'invalid-batch.json');
+  writeFileSync(invalidBatchFile, JSON.stringify({ scenarios: [] }));
+  const invalidBatch = spawnSync(process.execPath, [
+    join(installedDir, 'bin', 'credorewards-batch.mjs'), invalidBatchFile
+  ], { cwd: temp, encoding: 'utf8' });
+  assert.equal(invalidBatch.status, 1);
+  assert.match(invalidBatch.stderr, /scenarios must be a non-empty array/);
   console.log('Package smoke test passed: installed CLIs, reward/comparison/catalog/audit/batch APIs and strict schema validation.');
 } finally {
   rmSync(temp, { recursive: true, force: true });
