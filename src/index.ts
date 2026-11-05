@@ -1,3 +1,5 @@
+export { createBatchReport } from './batch.js';
+export type { BatchScenario, BatchReport, BatchScenarioReport, BatchCardMonthlyReport, MonthlyCardSummary } from './batch.js';
 export { auditCatalogUpdate } from './catalog-audit.js';
 export type { CatalogUpdateAudit } from './catalog-audit.js';
 import { resolveAnnualCardTerms } from './catalog.js';
