@@ -73,7 +73,7 @@ See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for source-only batch report seman
 
 ## Development preview (unpublished)
 
-The `feat/schema-validation-batch-reports` branch introduces `createBatchReport(scenarios)`, a `credorewards-batch` CLI and purpose-built JSON Schema v1 validation through `@credonomics/rewards-engine/catalog-schema-validator` and `credorewards-catalog`. These additions are **not** available from the already published `@next` (`0.2.0-alpha.2`) until a separately reviewed release is built and published.
+Current development source introduces `createBatchReport(scenarios)`, a `credorewards-batch` CLI and purpose-built JSON Schema v1 validation through `@credonomics/rewards-engine/catalog-schema-validator` and `credorewards-catalog`. These additions are **not** available from the already published `@next` (`0.2.0-alpha.2`) until a separately reviewed release is built and published.
 
 From a checkout of this development branch:
 
