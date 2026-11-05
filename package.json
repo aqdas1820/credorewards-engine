@@ -1,6 +1,6 @@
 {
   "name": "@credonomics/rewards-engine",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.0-alpha.2",
   "description": "Transparent, deterministic India-focused credit card cashback rules engine (fictional examples only)",
   "type": "module",
   "license": "MIT",
