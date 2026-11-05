@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/aqdas1820/credorewards-engine/main/schemas/rule-catalog.v1.schema.json",
+  "title": "CredoRewards Engine Rule Catalog, schemaVersion 1",
+  "description": "Structural JSON contract. Runtime validateRuleCatalog checks calendar validity, revision overlaps, duplicate IDs and source URL syntax. This schema never verifies issuer truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "revisions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "revisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/revision"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "calendarDate": {
+      "type": "string",
+      "pattern": "^(?:20[0-9]{2}|2100)-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
+    },
+    "paise": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cashbackRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "rateBps"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "category": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "rateBps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "minTransactionPaise": {
+          "$ref": "#/$defs/paise"
+        },
+        "monthlyCapPaise": {
+          "$ref": "#/$defs/paise"
+        },
+        "annualCapPaise": {
+          "$ref": "#/$defs/paise"
+        }
+      }
+    },
+    "cardTerms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "annualFeePaise",
+        "rules"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "annualFeePaise": {
+          "$ref": "#/$defs/paise"
+        },
+        "annualFeeWaiverThresholdPaise": {
+          "$ref": "#/$defs/paise"
+        },
+        "feeWaiverExcludedCategories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "excludedCategories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/cashbackRule"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "documentTitle",
+        "retrievedOn"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^https://[^\\s]+$",
+          "description": "HTTPS URL shape only; not verified as first-party or accessible."
+        },
+        "documentTitle": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "retrievedOn": {
+          "$ref": "#/$defs/calendarDate"
+        },
+        "section": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "reviewed"
+          ]
+        },
+        "reviewer": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "reviewedOn": {
+          "$ref": "#/$defs/calendarDate"
+        },
+        "notes": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "reviewed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "reviewer",
+              "reviewedOn"
+            ]
+          }
+        }
+      ]
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revisionId",
+        "issuer",
+        "cardVariant",
+        "effectiveFrom",
+        "terms",
+        "evidence",
+        "review"
+      ],
+      "properties": {
+        "revisionId": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "issuer": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "cardVariant": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "effectiveFrom": {
+          "$ref": "#/$defs/calendarDate"
+        },
+        "effectiveThrough": {
+          "$ref": "#/$defs/calendarDate"
+        },
+        "terms": {
+          "$ref": "#/$defs/cardTerms"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+        "review": {
+          "$ref": "#/$defs/review"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "review": {
+                "properties": {
+                  "status": {
+                    "const": "reviewed"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            "required": [
+              "review"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
