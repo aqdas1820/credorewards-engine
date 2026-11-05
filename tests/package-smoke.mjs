@@ -53,7 +53,11 @@ try {
   assert.equal(publishedSchema.properties?.schemaVersion?.const, 1);
   assert.equal(metadata.exports?.['./schemas/rule-catalog.v1.schema.json'],
     './schemas/rule-catalog.v1.schema.json', 'Public schema export missing');
-
+  // Resolve the documented JSON Schema subpath from a real consuming project,
+  // not by reaching inside node_modules. A manifest entry alone is insufficient.
+  run(process.execPath, ['-e',
+    "const s = require('@credonomics/rewards-engine/schemas/rule-catalog.v1.schema.json'); if (s.properties?.schemaVersion?.const !== 1) process.exit(1);"
+  ], temp);
 
   const shim = join(temp, 'node_modules', '.bin', process.platform === 'win32'
     ? 'credorewards.cmd'
