@@ -15,10 +15,16 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./schemas/rule-catalog.v1.schema.json": "./schemas/rule-catalog.v1.schema.json"
+    "./schemas/rule-catalog.v1.schema.json": "./schemas/rule-catalog.v1.schema.json",
+    "./catalog-schema-validator": {
+      "types": "./bin/catalog-schema-validator.d.mts",
+      "default": "./bin/catalog-schema-validator.mjs"
+    }
   },
   "bin": {
-    "credorewards": "bin/credorewards.mjs"
+    "credorewards": "bin/credorewards.mjs",
+    "credorewards-catalog": "bin/credorewards-catalog.mjs",
+    "credorewards-batch": "bin/credorewards-batch.mjs"
   },
   "files": [
     "dist",
@@ -33,7 +39,8 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "demo": "npm run build && node bin/credorewards.mjs examples/fictional-card.json",
     "test:package": "npm run build && node tests/package-smoke.mjs",
-    "validate:catalog": "npm run build && node scripts/check-catalog.mjs examples/fictional-catalog.json"
+    "validate:catalog": "npm run build && node scripts/check-catalog.mjs examples/fictional-catalog.json",
+    "demo:batch": "npm run build && node bin/credorewards-batch.mjs examples/fictional-batch.json"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

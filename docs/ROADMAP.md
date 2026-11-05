@@ -17,8 +17,14 @@
 - Audit history transitions: block silent term overwrites, evidence rewrites, period reopenings and review downgrades
 - Document explicit first-party issuer verification and peer-review process (no issuer terms automatically verified)
 
-## v0.2 — remaining work after alpha.2
-- Integrated full JSON Schema validation for user-provided catalogs and batch report output
+## Post-alpha.2 development — not yet released
+- Enforce every validation keyword used by the bundled catalog v1 JSON Schema from a zero-runtime-dependency schema checker and catalog CLI
+- Keep calendar, overlapping revision and evidence provenance domain checks separate from schema shape validation
+- Produce deterministic batch card-comparison reports with per-calendar-month summaries for multiple independent fictional spending scenarios
+- Test both APIs and CLIs via independently installed npm tarballs; these features are not in the published alpha.2 package
+
+## v0.2 — remaining planned work
+- General-purpose JSON Schema Draft 2020-12 compatibility or use of a vetted schema validation dependency (current implementation supports only the bundled schema contract)
 - Statement billing cycles and spend tiers
 - Better rate/cap attribution and per-month summaries
 - Actual split-year rewards evaluation with explicitly defined cap and fee semantics
