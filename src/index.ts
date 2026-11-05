@@ -1,3 +1,8 @@
+import { resolveAnnualCardTerms } from './catalog.js';
+import type { RuleCatalog, RuleResolveOptions, RuleEvidence, RuleReview } from './catalog.js';
+export { validateRuleCatalog, resolveCardTerms, resolveAnnualCardTerms } from './catalog.js';
+export type { RuleCatalog, RuleEvidence, RuleReview, CardRuleRevision, RuleResolveOptions } from './catalog.js';
+
 /**
  * CredoRewards Engine: deterministic, audit-friendly cashback calculations.
  * All money is expressed in integer paise. No real issuer terms are included.
@@ -313,4 +318,54 @@ export function compareCards(
       'Real issuer rules, reward-point valuations, MCC mapping and statement cycles are not supplied by this engine.'
     ]
   };
+}
+
+
+/** Rule provenance for a year-wide card ranking candidate. */
+export interface CatalogComparisonSelection {
+  cardId: string;
+  revisionId: string;
+  effectiveFrom: string;
+  effectiveThrough?: string;
+  evidence: RuleEvidence[];
+  review: RuleReview;
+}
+
+export interface CatalogComparisonResult {
+  comparison: CardComparisonResult;
+  /** In the same order as comparison.entries. */
+  selections: CatalogComparisonSelection[];
+}
+
+/**
+ * Evaluate dated catalog revisions without pretending that a mid-year rule
+ * change has a single year-wide rate. Drafts require explicit opt-in.
+ *
+ * This does not independently authenticate the review metadata or issuer URLs.
+ */
+export function compareCatalogCards(
+  catalog: RuleCatalog,
+  cardIds: string[],
+  transactions: Transaction[],
+  year: number,
+  options: RuleResolveOptions = {}
+): CatalogComparisonResult {
+  if (!Array.isArray(cardIds) || cardIds.length < 2) {
+    throw new Error('cardIds must contain at least two card IDs');
+  }
+  const resolved = cardIds.map(cardId => resolveAnnualCardTerms(catalog, cardId, year, options));
+  const comparison = compareCards(resolved.map(revision => revision.terms), transactions, year);
+  const selections = comparison.entries.map((entry): CatalogComparisonSelection => {
+    const revision = resolved.find(candidate => candidate.terms.id === entry.cardId);
+    if (!revision) throw new Error('missing catalog revision for ' + entry.cardId);
+    return {
+      cardId: entry.cardId,
+      revisionId: revision.revisionId,
+      effectiveFrom: revision.effectiveFrom,
+      ...(revision.effectiveThrough ? { effectiveThrough: revision.effectiveThrough } : {}),
+      evidence: revision.evidence,
+      review: revision.review
+    };
+  });
+  return { comparison, selections };
 }
