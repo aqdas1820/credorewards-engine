@@ -208,3 +208,109 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
     ]
   };
 }
+
+
+/**
+ * One independent annual evaluation for a candidate card.
+ *
+ * Tied cards share the same rank; subsequent ranks use competition ranking
+ * (1, 1, 3). A deterministic card-ID sort breaks display-order ties.
+ */
+export interface CardComparisonEntry {
+  rank: number;
+  cardId: string;
+  cardName: string;
+  netAnnualValuePaise: number;
+  totalRewardsPaise: number;
+  annualFeeChargedPaise: number;
+  /** Non-negative gap from the best net annual value. */
+  differenceFromLeaderPaise: number;
+  /** Full audit-friendly breakdown from calculateRewards. */
+  calculation: CalculationResult;
+}
+
+export interface CardComparisonResult {
+  year: number;
+  /** All tied top-ranked cards; never arbitrarily choose one winner. */
+  leaderCardIds: string[];
+  /** Sorted by net annual value descending, then card ID ascending. */
+  entries: CardComparisonEntry[];
+  assumptions: string[];
+}
+
+/**
+ * Compare at least two hypothetical cards against the SAME complete-year spend.
+ *
+ * This is an all-spend-on-one-card scenario comparison, NOT a per-purchase
+ * allocation optimizer. It deliberately reuses calculateRewards so caps,
+ * exclusions and fee-waiver semantics remain identical to single-card runs.
+ *
+ * Only caller-supplied fictional or independently verified terms are used.
+ * Do not infer issuer rates or recommend real cards based on unsourced terms.
+ */
+export function compareCards(
+  cards: CardTerms[],
+  transactions: Transaction[],
+  year: number
+): CardComparisonResult {
+  if (!Array.isArray(cards) || cards.length < 2) {
+    throw new Error('cards must contain at least two card terms');
+  }
+
+  const cardIds = new Set<string>();
+  const scored: { card: CardTerms; calculation: CalculationResult }[] = [];
+
+  for (const card of cards) {
+    const calculation = calculateRewards(card, transactions, year);
+    if (cardIds.has(calculation.cardId)) {
+      throw new Error('duplicate card id: ' + calculation.cardId);
+    }
+    cardIds.add(calculation.cardId);
+    scored.push({ card, calculation });
+  }
+
+  scored.sort((left, right) => {
+    const l = left.calculation.netAnnualValuePaise;
+    const r = right.calculation.netAnnualValuePaise;
+    if (l !== r) return l > r ? -1 : 1;
+    return left.card.id < right.card.id ? -1 : left.card.id > right.card.id ? 1 : 0;
+  });
+
+  const leader = scored[0];
+  if (!leader) throw new Error('no card results to compare');
+  const leaderNet = BigInt(leader.calculation.netAnnualValuePaise);
+
+  let rank = 0;
+  let previousNet: number | undefined;
+  const entries = scored.map(({ card, calculation }, index): CardComparisonEntry => {
+    if (previousNet === undefined || calculation.netAnnualValuePaise !== previousNet) {
+      rank = index + 1;
+      previousNet = calculation.netAnnualValuePaise;
+    }
+    return {
+      rank,
+      cardId: card.id,
+      cardName: card.name,
+      netAnnualValuePaise: calculation.netAnnualValuePaise,
+      totalRewardsPaise: calculation.totalRewardsPaise,
+      annualFeeChargedPaise: calculation.annualFeeChargedPaise,
+      differenceFromLeaderPaise: safeNumber(
+        leaderNet - BigInt(calculation.netAnnualValuePaise),
+        'differenceFromLeaderPaise'
+      ),
+      calculation
+    };
+  });
+
+  return {
+    year,
+    leaderCardIds: entries.filter(entry => entry.rank === 1).map(entry => entry.cardId),
+    entries,
+    assumptions: [
+      'Every card is evaluated independently against the same complete-year transaction history.',
+      'The result is not a per-purchase card-allocation recommendation.',
+      'Fees, waiver eligibility and cashback caps are computed under the supplied card terms.',
+      'Real issuer rules, reward-point valuations, MCC mapping and statement cycles are not supplied by this engine.'
+    ]
+  };
+}
