@@ -11,7 +11,7 @@
 - Deterministic net-annual-value comparison across two or more hypothetical cards, with tied rankings and audit details (introduced in v0.1.0-alpha.2)
 - Expanded release validation: 47 automated tests and independently installed npm tarball API smoke tests
 
-## v0.2.0-alpha.2 — development proposal (not yet released)
+## v0.2.0-alpha.2 — release candidate (not yet published)
 - JSON Schema authoring contract for catalogs; still requires runtime cross-revision validation
 - Offline fictional catalog fixture verification in CI and GitHub prerelease workflow
 - Audit history transitions: block silent term overwrites, evidence rewrites, period reopenings and review downgrades
