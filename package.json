@@ -14,7 +14,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./schemas/rule-catalog.v1.schema.json": "./schemas/rule-catalog.v1.schema.json"
   },
   "bin": {
     "credorewards": "bin/credorewards.mjs"
@@ -23,7 +24,8 @@
     "dist",
     "bin",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "schemas"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
