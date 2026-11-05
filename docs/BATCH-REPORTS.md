@@ -1,6 +1,6 @@
-# Structured batch comparison reports (experimental development feature)
+# Structured batch comparison reports (experimental alpha.3 release candidate)
 
-This branch adds `createBatchReport(scenarios)`, a pure TypeScript API for evaluating **multiple independent fictional annual card comparisons** and producing deterministic, JSON-serializable results. The new API and CLI are **not** in the already-published npm `v0.2.0-alpha.2`; a later release is required.
+The **unpublished v0.2.0-alpha.3 release candidate** includes `createBatchReport(scenarios)`, a pure TypeScript API for evaluating **multiple independent fictional annual card comparisons** and producing deterministic JSON-serializable results. The API and CLI are **not** in the already published npm `v0.2.0-alpha.2`; alpha.3 must be released and verified separately.
 
 ## Example
 
