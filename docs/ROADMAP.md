@@ -6,17 +6,20 @@
 - Synthetic test suite and GitHub CI
 
 ## v0.2
+- Deterministic net-annual-value comparison across two or more hypothetical cards
+- Explicit tied rankings, audit calculations and fee/cap explanations
 - JSON schema + input validation contract, batch report output
 - Statement billing cycles and spend tiers
 - Better rate/cap attribution and per-month summaries
 
 ## v0.3
+- Source-verified, dated issuer rule-pack review workflow (no unverified bank rules)
 - Reward points with explicit, dated valuation assumptions
 - Source-backed issuer rules as a **separate**, reviewable and dated dataset
 - Rules versioning, effective dates and provenance
 
 ## v1.0 target
-- Published npm package (once name availability and license review are complete)
+- Stable npm release with defined compatibility guarantees (public alpha already exists)
 - Integration examples for web apps and Node.js
 - External contributor tests, documentation, security review
 
