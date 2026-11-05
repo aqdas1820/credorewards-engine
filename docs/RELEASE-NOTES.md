@@ -1,42 +1,49 @@
-# CredoRewards Engine v0.1.0-alpha.2
+# CredoRewards Engine v0.2.0-alpha.1
 
-Second public alpha release candidate, following `0.1.0-alpha.1`. GitHub prerelease and npm publication are independent actions: verify availability on each channel separately.
+Third alpha release candidate, following the publicly released `v0.1.0-alpha.2`. The GitHub prerelease workflow and npm publishing are **separate** actions; neither channel should be described as published until its respective release completes.
 
-## Highlights
+## New: dated, review-gated card rule catalog
 
-- **New: `compareCards(cards, transactions, year)`** ranks two or more fictional or independently verified cashback cards by estimated **net annual value** (rewards minus supplied annual fees).
-- Equal-value cards share first place, with deterministic ordering and `leaderCardIds` listing all tied winners.
-- Each ranking entry includes the full `calculateRewards` breakdown, fee-waiver result, cap/exclusion reasons and difference from the leader in integer paise.
-- The comparison uses the *same complete-year transactions for each card independently*; it does not optimize per-purchase card allocation.
+- `validateRuleCatalog(catalog)` validates schema version, distinct revision IDs, rule data, evidence metadata, date ranges, and non-overlapping effective periods for the same card.
+- `resolveCardTerms(catalog, cardId, asOf)` returns the applicable card-rule revision on a calendar date.
+- `resolveAnnualCardTerms(catalog, cardId, year)` requires **one unchanged revision covering the entire calendar year**. It rejects mid-year changes rather than applying inaccurate year-wide rates.
+- `compareCatalogCards(catalog, cardIds, transactions, year)` calculates the existing annual cashback ranking from eligible revisions and returns the chosen revision IDs, review records and evidence metadata.
+- Draft entries are excluded by default and require an explicit `{ allowDraft: true }` option for clearly labeled hypothetical tests.
 
-## Quality and distribution
+The versioned catalog is *infrastructure for source governance*, **not** a validated bank-rate database. A `reviewed` flag is supplied by catalog maintainers; the library neither authenticates reviewers nor fetches/validates the underlying issuer documents.
 
-- 29 automated unit tests, including 10 for card comparison.
-- npm tarball installation smoke tests for CLI, `calculateRewards` and `compareCards` exports.
-- Normalized npm CLI binary path and Git repository metadata.
-- Package-test compatibility fixes for npm 12 and inherited `allow-scripts` settings; CI coverage across Windows/Linux and Node 24/26.
-- Zero core runtime dependencies.
+## Compatibility and validation
 
-## Installation
+- Existing `calculateRewards()`, `compareCards()` and CLI remain available.
+- Integer-paise arithmetic and annual cap/fee semantics remain unchanged.
+- 45 unit tests (29 previously available + 16 catalog tests), with installed-tarball checks for reward, comparison, catalog APIs and CLI.
+- CI covers Linux and Windows, npm 12, and Node.js 24/26, including the inherited npm `allow-scripts` configuration regression.
+- A new release-manifest consistency test checks version metadata, lockfile and release notes.
+- Zero runtime dependencies.
 
-Once the version is available on npm:
+## Use after npm publication
 
 ```bash
-npm install @credonomics/rewards-engine@0.1.0-alpha.2
+npm install @credonomics/rewards-engine@0.2.0-alpha.1
 ```
 
-From source:
+`@next` will refer to this version **only after** the npm registry reflects a successful authorized publish.
+
+From the source checkout:
 
 ```bash
 npm ci
+npm run typecheck
 npm test
 npm run test:package
 ```
 
-Documentation: [Card comparison](docs/CARD-COMPARISON.md) · [npm publishing](docs/NPM-PUBLISHING.md)
+See [Rule Catalog](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/RULE-CATALOG.md), [Card Comparison](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/CARD-COMPARISON.md) and [npm publishing runbook](https://github.com/aqdas1820/credorewards-engine/blob/main/docs/NPM-PUBLISHING.md).
 
-## Important limitations
+## Financial and security limitations
 
-This alpha includes **no real issuer card terms**. Example data is fictional; there are no verified live bank rules. Reward-point valuations, statement-cycle rules, MCC detection, fuel surcharges, merchant offers, GST calculation and per-transaction card allocation are unsupported. Annual-fee calculations assume a complete year of transactions, with applicable taxes already included in supplied fees. Do not treat calculated rankings as financial advice.
+Only fictional rule fixtures are bundled. This alpha has **no independently authenticated real issuer rates**, merchant/MCC mapping, bank integrations, reward-point valuation, GST computation, statement-cycle caps, split-year recalculation, or per-purchase card-allocation optimization. Reviewed metadata is not external certification.
 
-For bugs, use synthetic inputs only. Never upload card numbers, account records, financial statements, API keys or authentication credentials.
+Annual-fee calculations assume complete-year transaction inputs and supplied fees inclusive of applicable taxes. Do not use hypothetical results as personalized financial advice. Never include account records, card numbers, statements, OTPs or access credentials in bug reports.
+
+**Release gate:** Confirm that `0.2.0-alpha.1` is unused on npm and that `v0.2.0-alpha.1` does not already exist as a Git tag or release. Never reuse an existing published version.
