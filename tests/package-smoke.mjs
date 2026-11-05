@@ -47,6 +47,10 @@ try {
   assert.equal(metadata.name, sourceManifest.name, 'Installed package name differs from source');
   assert.equal(metadata.version, sourceManifest.version, 'Installed package version differs from source');
   assert.equal(metadata.bin?.credorewards, 'bin/credorewards.mjs', 'CLI mapping missing from package');
+  assert.equal(metadata.bin?.['credorewards-batch'], 'bin/credorewards-batch.mjs');
+  assert.equal(metadata.bin?.['credorewards-catalog'], 'bin/credorewards-catalog.mjs');
+  assert.equal(metadata.exports?.['./catalog-schema-validator']?.default,
+    './bin/catalog-schema-validator.mjs');
   const schemaPath = join(installedDir, 'schemas', 'rule-catalog.v1.schema.json');
   assert.ok(existsSync(schemaPath), 'Public JSON Schema missing from installed tarball');
   const publishedSchema = JSON.parse(readFileSync(schemaPath, 'utf8'));
@@ -66,9 +70,16 @@ try {
 
   const help = run(process.execPath, [join(installedDir, 'bin', 'credorewards.mjs'), '--help'], temp);
   assert.match(help, /Usage: credorewards/);
+  const batchHelp = run(process.execPath,
+    [join(installedDir, 'bin', 'credorewards-batch.mjs'), '--help'], temp);
+  assert.match(batchHelp, /Usage: credorewards-batch/);
+  const catalogHelp = run(process.execPath,
+    [join(installedDir, 'bin', 'credorewards-catalog.mjs'), '--help'], temp);
+  assert.match(catalogHelp, /Usage: credorewards-catalog/);
 
   const consumer = join(temp, 'consumer.mjs');
-  writeFileSync(consumer, `import { calculateRewards, compareCards, validateRuleCatalog, resolveAnnualCardTerms, compareCatalogCards, auditCatalogUpdate } from '@credonomics/rewards-engine';
+  writeFileSync(consumer, `import { calculateRewards, compareCards, validateRuleCatalog, resolveAnnualCardTerms, compareCatalogCards, auditCatalogUpdate, createBatchReport } from '@credonomics/rewards-engine';
+import { validateCatalogJsonSchema } from '@credonomics/rewards-engine/catalog-schema-validator';
 const card = { id: 'test', name: 'Test', annualFeePaise: 0,
   excludedCategories: [], rules: [{ id: 'base', category: '*', rateBps: 100 }] };
 const tx = [{ id: '1', month: '2026-01', category: 'utilities', amountPaise: 10000 }];
@@ -89,9 +100,43 @@ const ranked = compareCatalogCards(catalog, ['other', 'test'], tx, 2026, { allow
 if (ranked.comparison.leaderCardIds[0] !== 'test' || ranked.selections[0].revisionId !== 'test-2026') process.exit(5);
 const report = auditCatalogUpdate(catalog, catalog);
 if (report.unchangedRevisionIds.length !== 2) process.exit(6);
+if (!validateCatalogJsonSchema(catalog).valid) process.exit(7);
+if (validateCatalogJsonSchema({ ...catalog, typo: true }).valid) process.exit(8);
+const batch = createBatchReport([{ id: 'synthetic-case', year: 2026,
+  cards: [card, other], transactions: tx }]);
+if (batch.scenarios[0].comparison.leaderCardIds[0] !== 'test') process.exit(9);
+if (batch.scenarios[0].monthlyByCard[0].months[0].totalRewardsPaise !== 100) process.exit(10);
 `);
   run(process.execPath, [consumer], temp);
-  console.log('Package smoke test passed: installed CLI, reward, comparison, catalog and history-audit APIs.');
+  const catalogFile = join(temp, 'catalog-demo.json');
+  writeFileSync(catalogFile, JSON.stringify({
+    schemaVersion: 1, revisions: [{
+      revisionId: 'synthetic-v1', issuer: 'Fictional Issuer',
+      cardVariant: 'Fictional Card', effectiveFrom: '2026-01-01',
+      terms: { id: 'fictional', name: 'Fictional',
+        annualFeePaise: 0, rules: [{ id: 'base', category: '*', rateBps: 100 }] },
+      evidence: [], review: { status: 'draft' }
+    }]
+  }));
+  const catalogOutput = run(process.execPath,
+    [join(installedDir, 'bin', 'credorewards-catalog.mjs'), catalogFile], temp);
+  assert.match(catalogOutput, /valid catalog metadata/);
+  const batchFile = join(temp, 'batch-demo.json');
+  writeFileSync(batchFile, JSON.stringify({ scenarios: [{
+    id: 'fictional-case', year: 2026,
+    cards: [
+      { id: 'a', name: 'Fictional A', annualFeePaise: 0,
+        rules: [{ id: 'base', category: '*', rateBps: 100 }] },
+      { id: 'b', name: 'Fictional B', annualFeePaise: 0,
+        rules: [{ id: 'base', category: '*', rateBps: 200 }] }
+    ],
+    transactions: [{ id: 'tx', month: '2026-01',
+      category: 'utilities', amountPaise: 10000 }]
+  }] }));
+  const batchOutput = run(process.execPath,
+    [join(installedDir, 'bin', 'credorewards-batch.mjs'), batchFile], temp);
+  assert.equal(JSON.parse(batchOutput).scenarios[0].comparison.leaderCardIds[0], 'b');
+  console.log('Package smoke test passed: installed CLIs, reward/comparison/catalog/audit/batch APIs and strict schema validation.');
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
