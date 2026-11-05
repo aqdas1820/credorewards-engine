@@ -1,27 +1,27 @@
-# CredoRewards Engine v0.1.0-alpha.1
+# CredoRewards Engine v0.1.0-alpha.2 (proposed)
 
-First public **alpha** of CredoRewards Engine, a transparent TypeScript SDK for fictional credit-card cashback rules.
+This is the **next alpha release candidate**, not yet published. It follows the first npm-published version `0.1.0-alpha.1`.
 
-## Included
-- Integer-paise calculations using explicit basis-point cashback rates.
-- Category-specific rules with wildcard fallback.
-- Monthly and annual reward caps, minimum transaction spend, and exclusions.
-- Annual-fee waivers and fee-waiver spend exclusions.
-- Explainable per-transaction results, CLI, TypeScript declarations, and tests.
-- MIT-licensed source and zero core runtime dependencies.
+## Changes
+- Normalize the npm CLI binary path so npm publish does not warn about a leading `./`.
+- Normalize the Git repository URL in npm package metadata.
+- Add a fresh-directory package installation test for both ESM imports and CLI wiring.
+- Run the package smoke test in CI and before GitHub prereleases.
+- Correct documentation to reflect the existing npm package.
 
-## Install and try
-Download the attached npm-style `.tgz` archive from this GitHub Release or clone the repository.
+## What remains intentionally unsupported
+This alpha uses **fictional** issuer/card rules only. No live bank integration, reward-points conversion, fuel surcharge, milestone awards, GST calculations, merchant-specific offers or statement-cycle caps. Annual-fee calculations require a complete year's transaction data. Do not rely on this alpha alone for financial decisions.
 
+## Install after the npm release is published
 ```bash
-npm install
-npm test
-npm run demo
+npm install @credonomics/rewards-engine@next
 ```
 
-The `@credonomics/rewards-engine` name in `package.json` does **not** mean this package is published on npm.
+For source development:
+```bash
+npm ci
+npm test
+npm run test:package
+```
 
-## Important limitations
-**No real issuer terms are included.** The sample card and transactions are fictional. This alpha does not support reward-point valuations, milestone offers, GST computations, fuel surcharges, MCC detection, merchant offers, foreign-exchange fees, or statement-cycle rules. Annual-fee calculations require a complete year of transactions. Do not use this alpha alone for financial decisions.
-
-Found a bug or want to contribute? Please open a GitHub issue with synthetic reproducible inputs. Never upload real card numbers, statements, or other personal financial records.
+Do not disclose real card statements, card numbers, API secrets or financial account records in bug reports.

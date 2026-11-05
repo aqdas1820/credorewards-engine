@@ -6,7 +6,7 @@
 
 Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credonomics.in)
 
-> **Alpha / not published to npm yet.** This starter is not connected to banks or payment networks. All sample card rules are fictional. Do not use the output for financial decisions without independently validating issuer terms and the complete calculation period.
+> **Experimental alpha, published to npm under the `next` dist-tag.** This starter is not connected to banks or payment networks. All sample card rules are fictional. Do not use the output for financial decisions without independently validating issuer terms and the complete calculation period.
 
 ## What this MVP does
 
@@ -32,7 +32,7 @@ npm test
 npm run demo
 ```
 
-For this generated starter, the commands also work using a globally available `tsc` for building if npm install is not available.
+To use the registry package in another project: `npm install @credonomics/rewards-engine@next`. Run `npm run test:package` from this source repository to verify an independently installed tarball, CLI and ESM import.
 
 Or programmatic usage:
 
@@ -67,13 +67,13 @@ See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics and [ROADMAP.md](doc
 
 ## npm package status
 
-**Not yet published to npm.** The planned name `@credonomics/rewards-engine` requires verified control of the `@credonomics` npm scope. Do not use the npm installation/import instructions against the public registry until publication is confirmed. Maintainers: read the [npm publication checklist](docs/NPM-PUBLISHING.md) before any first publish.
+The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). Version `0.1.0-alpha.1` was initially published with the `next` tag; `0.1.0-alpha.2` is the proposed follow-up release in this branch, **not yet published**. The npm publish warning about a normalized `bin` path does not independently establish CLI breakage. Verify the published `bin` metadata and installation before relying on the CLI. Maintainers: see [npm publishing](docs/NPM-PUBLISHING.md).
 
 ## GitHub prerelease
 
-The `0.1.0-alpha.1` starter can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck and 19 automated tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
+Each new package version can be published as a **GitHub prerelease**, separate from npm publication. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, 19 unit tests and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
 
-**No npm package is published by this workflow.** Do not advertise a live npm installation until the package has actually been published and checked. See [release notes](docs/RELEASE-NOTES.md).
+**This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
 
 ## Ground rules for contributors
 
