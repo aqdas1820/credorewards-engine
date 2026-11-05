@@ -6,6 +6,8 @@
 - Synthetic test suite and GitHub CI
 
 ## v0.2
+- Experimental versioned rule-catalog schema, date applicability checks, provenance metadata and explicit draft/reviewed gate
+- Year-safe catalog-backed card comparison (refuses mid-year rule changes until period-aware math exists)
 - Deterministic net-annual-value comparison across two or more hypothetical cards
 - Explicit tied rankings, audit calculations and fee/cap explanations
 - JSON schema + input validation contract, batch report output
@@ -13,7 +15,7 @@
 - Better rate/cap attribution and per-month summaries
 
 ## v0.3
-- Source-verified, dated issuer rule-pack review workflow (no unverified bank rules)
+- Separately governed human review workflow and actually source-verified issuer datasets (no unverified bank rules)
 - Reward points with explicit, dated valuation assumptions
 - Source-backed issuer rules as a **separate**, reviewable and dated dataset
 - Rules versioning, effective dates and provenance
