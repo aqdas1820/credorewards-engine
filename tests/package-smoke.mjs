@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,7 +11,7 @@ const npmCli = process.env.npm_execpath;
 
 function run(command, args, cwd, shell = false) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', shell });
-  assert.equal(result.status, 0, `${command} ${args.join(' ')} failed:\n${result.stdout}\n${result.stderr}`);
+  assert.equal(result.status, 0, `${command} ${args.join(' ')} failed:\n${result.stdout}\n${result.stderr}\n${result.error?.message ?? ''}`);
   return result.stdout;
 }
 
@@ -21,9 +21,12 @@ function runNpm(args, cwd) {
 }
 
 try {
-  const [{ filename }] = JSON.parse(runNpm(
-    ['pack', '--json', '--ignore-scripts', '--pack-destination', temp], root
-  ));
+  // npm 12 changed npm pack --json from an array to a keyed object.
+  // Detect the uniquely created tarball instead of relying on npm CLI JSON output.
+  runNpm(['pack', '--ignore-scripts', '--pack-destination', temp], root);
+  const filenames = readdirSync(temp).filter(name => name.endsWith('.tgz'));
+  assert.equal(filenames.length, 1, 'Expected exactly one packed npm tarball');
+  const filename = filenames[0];
   assert.ok(filename && existsSync(join(temp, filename)), 'Expected npm tarball');
 
   runNpm([
