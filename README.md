@@ -18,7 +18,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Transaction-by-transaction explanations and a net annual value estimate
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
 - Experimental dated rule-catalog metadata, provenance and review-gated version resolution (published in v0.2.0-alpha.1)
-- Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (included in the v0.2.0-alpha.2 release candidate; not yet on npm)
+- Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (included in source for v0.2.0-alpha.2; check npm registry for published availability)
 - Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
 
 ## What it does **not** do (yet)
@@ -36,7 +36,7 @@ npm run validate:catalog
 npm run demo
 ```
 
-To use the most recently verified **published** prerelease in another project: `npm install @credonomics/rewards-engine@0.2.0-alpha.1`. The next candidate `0.2.0-alpha.2` contains the governance audit and packaged JSON Schema but remains **source-only until its separate GitHub and npm release steps complete**. Run `npm run test:package` from this source repository to check independently installed tarball APIs, schema and CLI.
+To install the npm registry's current prerelease in another project, use `npm install @credonomics/rewards-engine@next`; to reproduce the **previously verified** public alpha, pin `@credonomics/rewards-engine@0.2.0-alpha.1`. The current source targets `0.2.0-alpha.2`, but the new audit/schema features are only on npm once that exact version is independently published and verified. Run `npm run test:package` from this source repository to check independently installed tarball APIs, schema and CLI.
 
 Or programmatic usage:
 
@@ -71,11 +71,11 @@ See [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md
 
 ## npm package status
 
-The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). The last independently verified npm prerelease is **`0.2.0-alpha.1`**, published under `next`; `latest` remains `0.1.0-alpha.1`. This branch **prepares `0.2.0-alpha.2`** for review, including the new catalog audit and exported JSON Schema. The release candidate is **not yet published to npm**. Confirm actual registry dist-tags rather than assuming `@next` points to an unpublished version. See [npm publishing](docs/NPM-PUBLISHING.md).
+The public registry package is [@credonomics/rewards-engine](https://www.npmjs.com/package/@credonomics/rewards-engine). The last verified prerelease **before the `0.2.0-alpha.2` release preparation** was `0.2.0-alpha.1`; the source version now targets `0.2.0-alpha.2` with the catalog audit and exported JSON Schema. **Source version, GitHub prerelease and npm publication are separate facts.** Check `npm view @credonomics/rewards-engine dist-tags --json` and install an exact version to confirm current registry availability; `latest` is not automatically advanced by this alpha workflow. See [npm publishing](docs/NPM-PUBLISHING.md).
 
 ## GitHub prerelease
 
-Each new package version can be published as a **GitHub prerelease**, separate from npm publication. `v0.2.0-alpha.1` is already released and must not be reused. The next candidate tag is **`v0.2.0-alpha.2`**. Run the GitHub release workflow only on reviewed, merged `main` after verifying the new tag is unused. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, the current unit test suite and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
+Each new package version can be published as a **GitHub prerelease**, separate from npm publication. `v0.2.0-alpha.1` is already released and must not be reused. For this source version, the corresponding GitHub tag is **`v0.2.0-alpha.2`**; run the release workflow on reviewed, merged `main` only when that tag is still unused, and never rerun after success. Maintainers can use [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) and select **Run workflow** on `main`. The workflow runs the typecheck, the current unit test suite and independent package installation smoke tests, packs an installable `.tgz`, and creates tag `v${version}` only after validation. It refuses to reuse an existing release or version tag.
 
 **This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
 
