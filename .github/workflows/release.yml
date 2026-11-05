@@ -1,0 +1,71 @@
+name: Publish GitHub prerelease
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Validate and publish alpha
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies from lockfile
+        run: npm ci --ignore-scripts
+      - name: Validate TypeScript
+        run: npm run typecheck
+      - name: Run unit tests
+        run: npm test
+      - name: Pack distributable
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p 'require("./package.json").version')"
+          PACKAGE_FILE="$(npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP" | tail -n 1)"
+          test -f "$RUNNER_TEMP/$PACKAGE_FILE"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "asset=$RUNNER_TEMP/$PACKAGE_FILE" >> "$GITHUB_OUTPUT"
+      - name: Prevent duplicate or moved version tags
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.package.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "A GitHub release already exists for $RELEASE_TAG."
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Tag $RELEASE_TAG already exists; refusing to retarget it."
+            exit 1
+          fi
+      - name: Publish prerelease (not npm)
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.package.outputs.tag }}
+          PACKAGE_ASSET: ${{ steps.package.outputs.asset }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" "$PACKAGE_ASSET" \
+            --target "$GITHUB_SHA" \
+            --title "CredoRewards Engine $RELEASE_TAG" \
+            --notes-file docs/RELEASE-NOTES.md \
+            --prerelease
