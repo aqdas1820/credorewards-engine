@@ -8,6 +8,8 @@ export interface CatalogUpdateAudit {
   closedRevisionIds: string[];
   /** Draft revisions promoted to a recorded reviewed assertion. */
   promotedRevisionIds: string[];
+  /** Draft or promoted revisions with newly appended evidence entries. */
+  evidenceAppendedRevisionIds: string[];
   unchangedRevisionIds: string[];
 }
 
@@ -31,7 +33,7 @@ export function auditCatalogUpdate(
   const oldById = new Map(previous.revisions.map(revision => [revision.revisionId, revision]));
   const result: CatalogUpdateAudit = {
     addedRevisionIds: [], closedRevisionIds: [],
-    promotedRevisionIds: [], unchangedRevisionIds: []
+    promotedRevisionIds: [], evidenceAppendedRevisionIds: [], unchangedRevisionIds: []
   };
 
   for (const prior of previous.revisions) {
@@ -70,6 +72,7 @@ export function auditCatalogUpdate(
     }
     if (closed) result.closedRevisionIds.push(id);
     if (promoted) result.promotedRevisionIds.push(id);
+    if (next.evidence.length > prior.evidence.length) result.evidenceAppendedRevisionIds.push(id);
     if (!closed && !promoted && next.evidence.length === prior.evidence.length) {
       result.unchangedRevisionIds.push(id);
     }
