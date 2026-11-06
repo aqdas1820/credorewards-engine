@@ -50,7 +50,37 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || format('refs/tags/v{0}', inputs.version) }}
           fetch-depth: 1
 
+      # A successful upstream workflow can be a no-op when the version already
+      # has an immutable release. Do not mistake that success for a new release.
+      # A release published during/after this upstream run still proceeds to
+      # the existing strict tag/SHA/asset verification (and fails closed).
+      - name: Skip upstream runs that predate an existing immutable release
+        id: existing_release
+        if: github.event_name == 'workflow_run'
+        shell: bash
+        env:
+          UPSTREAM_STARTED: ${{ github.event.workflow_run.created_at }}
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p 'require("./package.json").version')"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]]; then
+            echo "Not an alpha prerelease; leaving strict verification enabled."
+            exit 0
+          fi
+          TAG="v$VERSION"
+          RELEASE_JSON="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" 2>/dev/null)" || {
+            echo "No existing GitHub release; leaving strict verification enabled."
+            exit 0
+          }
+          PUBLISHED_AT="$(jq -r '.published_at // empty' <<< "$RELEASE_JSON")"
+          if [[ -n "$PUBLISHED_AT" && "$PUBLISHED_AT" < "$UPSTREAM_STARTED" ]]; then
+            echo "Immutable $TAG was published before the upstream workflow started; no new release to publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "### Skipped: upstream GitHub prerelease created no new version" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Set up cloud Node.js for tokenless npm OIDC
+        if: steps.existing_release.outputs.skip != 'true'
         uses: actions/setup-node@v7
         with:
           node-version: '24'
@@ -58,9 +88,11 @@ jobs:
           package-manager-cache: false
 
       - name: Ensure npm CLI has OIDC publishing support
+        if: steps.existing_release.outputs.skip != 'true'
         run: npm install --global npm@12
 
       - name: Verify existing GitHub prerelease and artifact identity
+        if: steps.existing_release.outputs.skip != 'true'
         id: verify
         shell: bash
         run: |
@@ -112,6 +144,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Refuse published versions and unexpected registry errors
+        if: steps.existing_release.outputs.skip != 'true'
         id: registry
         env:
           VERSION: ${{ steps.verify.outputs.version }}
@@ -135,7 +168,8 @@ jobs:
           fi
 
       - name: Publish signed/provenance npm prerelease with OIDC, once
-        if: steps.registry.outputs.should_publish == 'true'
+        if: steps.existing_release.outputs.skip != 'true'
+        if: steps.existing_release.outputs.skip != 'true' && steps.registry.outputs.should_publish == 'true'
         env:
           RELEASE_TARBALL: ${{ steps.verify.outputs.asset }}
         shell: bash
@@ -144,6 +178,7 @@ jobs:
           npm publish "$RELEASE_TARBALL" --access public --tag next
 
       - name: Document possible post-publish registry processing
+        if: steps.existing_release.outputs.skip != 'true'
         if: steps.registry.outputs.should_publish == 'true'
         run: |
           echo "### npm publish request accepted" >> "$GITHUB_STEP_SUMMARY"
