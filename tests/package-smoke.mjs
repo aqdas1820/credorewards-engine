@@ -108,6 +108,45 @@ if (batch.scenarios[0].comparison.leaderCardIds[0] !== 'test') process.exit(9);
 if (batch.scenarios[0].monthlyByCard[0].months[0].totalRewardsPaise !== 100) process.exit(10);
 `);
   run(process.execPath, [consumer], temp);
+  // Compile a real consuming TypeScript project against the INSTALLED tarball,
+  // not the source tree. This protects published declaration exports and
+  // NodeNext module resolution from silently breaking despite passing JS tests.
+  const typedConsumer = join(temp, 'consumer.mts');
+  writeFileSync(typedConsumer, `import {
+  calculateRewards, compareCards, createBatchReport,
+  type CardTerms, type Transaction, type CalculationResult,
+  type CardComparisonResult, type BatchScenario, type BatchReport
+} from '@credonomics/rewards-engine';
+import { validateCatalogJsonSchema } from '@credonomics/rewards-engine/catalog-schema-validator';
+const card: CardTerms = {
+  id: 'typed', name: 'Synthetic', annualFeePaise: 0,
+  rules: [{ id: 'fallback', category: '*', rateBps: 100 }]
+};
+const tx: Transaction[] = [
+  { id: 'jan', month: '2026-01', category: 'fictional', amountPaise: 10000 }
+];
+const reward: CalculationResult = calculateRewards(card, tx, 2026);
+const comparison: CardComparisonResult = compareCards([
+  card, { ...card, id: 'typed-b' }
+], tx, 2026);
+const scenario: BatchScenario = {
+  id: 'typed-test', year: 2026, cards: [card, { ...card, id: 'typed-b' }],
+  transactions: tx
+};
+const report: BatchReport = createBatchReport([scenario]);
+const checked: boolean = validateCatalogJsonSchema({ schemaVersion: 1, revisions: [] }).valid;
+const result: number = reward.totalRewardsPaise +
+  comparison.entries.length + report.scenarioCount + Number(checked);
+void result;
+// @ts-expect-error amountPaise must stay a number, not a string
+const badAmount: Transaction = { id: 'bad', month: '2026-01', category: 'x', amountPaise: '100' };
+void badAmount;
+`);
+  const tscCli = join(root, 'node_modules', 'typescript', 'bin', 'tsc');
+  assert.ok(existsSync(tscCli), 'Expected installed TypeScript compiler for consumer smoke test');
+  run(process.execPath, [tscCli, '--strict', '--noEmit', '--skipLibCheck',
+    '--module', 'NodeNext', '--moduleResolution', 'NodeNext',
+    '--target', 'ES2022', typedConsumer], temp);
   const catalogFile = join(temp, 'catalog-demo.json');
   writeFileSync(catalogFile, JSON.stringify({
     schemaVersion: 1, revisions: [{
