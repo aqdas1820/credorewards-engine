@@ -1,3 +1,5 @@
+export { mapMccTransactions } from './mcc-mapping.js';
+export type { MccCategoryMapping, MccCodedTransaction } from './mcc-mapping.js';
 export { createBatchReport } from './batch.js';
 export type { BatchScenario, BatchReport, BatchScenarioReport, BatchCardMonthlyReport, MonthlyCardSummary } from './batch.js';
 export { auditCatalogUpdate } from './catalog-audit.js';
