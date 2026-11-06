@@ -67,7 +67,7 @@ export function summarizeStatementCycleSpend(
       throw new Error('transaction[' + tx.id + '].amountPaise must be a non-negative safe integer (paise)');
     }
     const match = typeof tx.date === 'string'
-      ? /^(20\\d{2}|2100)-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/.exec(tx.date)
+      ? /^(20\d{2}|2100)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.exec(tx.date)
       : null;
     if (!match) throw new Error('transaction[' + tx.id + '].date must be valid YYYY-MM-DD (2000–2100)');
     const year = Number(match[1]);
