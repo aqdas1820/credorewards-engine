@@ -14,18 +14,18 @@ test('monthly cap attribution is stable under reversed and interleaved input', (
   });
   const input = [
     transaction('z', '2026-01', 100),
-    transaction('a', '2026-02', 120),
+    transaction('feb-a', '2026-02', 120),
     transaction('b', '2026-01', 100),
     transaction('a', '2026-01', 100),
-    transaction('b', '2026-02', 120)
+    transaction('feb-b', '2026-02', 120)
   ];
   const expected = calculateRewards(terms, input, 2026);
   assert.deepEqual(expected.transactions.map(t => [t.month, t.id, t.earnedPaise]), [
     ['2026-01', 'a', 100],
     ['2026-01', 'b', 50],
     ['2026-01', 'z', 0],
-    ['2026-02', 'a', 120],
-    ['2026-02', 'b', 30]
+    ['2026-02', 'feb-a', 120],
+    ['2026-02', 'feb-b', 30]
   ]);
   assert.equal(expected.totalRewardsPaise, 300);
   for (const reordered of [[...input].reverse(), [input[2], input[4], input[0], input[3], input[1]]]) {
