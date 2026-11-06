@@ -168,7 +168,6 @@ jobs:
           fi
 
       - name: Publish signed/provenance npm prerelease with OIDC, once
-        if: steps.existing_release.outputs.skip != 'true'
         if: steps.existing_release.outputs.skip != 'true' && steps.registry.outputs.should_publish == 'true'
         env:
           RELEASE_TARBALL: ${{ steps.verify.outputs.asset }}
@@ -178,8 +177,7 @@ jobs:
           npm publish "$RELEASE_TARBALL" --access public --tag next
 
       - name: Document possible post-publish registry processing
-        if: steps.existing_release.outputs.skip != 'true'
-        if: steps.registry.outputs.should_publish == 'true'
+        if: steps.existing_release.outputs.skip != 'true' && steps.registry.outputs.should_publish == 'true'
         run: |
           echo "### npm publish request accepted" >> "$GITHUB_STEP_SUMMARY"
           echo "The package may be staged/processing before npm view and next dist-tag update." >> "$GITHUB_STEP_SUMMARY"
