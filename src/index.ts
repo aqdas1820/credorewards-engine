@@ -1,3 +1,5 @@
+export { summarizeStatementCycleSpend } from './statement-cycles.js';
+export type { DatedSpendTransaction, StatementCycleSpendSummary } from './statement-cycles.js';
 export { createBatchReport } from './batch.js';
 export type { BatchScenario, BatchReport, BatchScenarioReport, BatchCardMonthlyReport, MonthlyCardSummary } from './batch.js';
 export { auditCatalogUpdate } from './catalog-audit.js';
