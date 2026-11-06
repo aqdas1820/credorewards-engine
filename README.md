@@ -19,7 +19,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
 - Experimental dated rule-catalog metadata, provenance and review-gated version resolution (published in v0.2.0-alpha.1)
 - Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (published in v0.2.0-alpha.2)
-- Strict bundled catalog v1 schema validation and multi-scenario monthly batch reports (in the v0.2.0-alpha.3 release candidate, **not yet published**)
+- Strict bundled catalog v1 schema validation and multi-scenario monthly batch reports (in the v0.2.0-alpha.3 GitHub prerelease; npm workflow succeeded, registry visibility unverified)
 - Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
 
 ## What it does **not** do (yet)
@@ -37,7 +37,7 @@ npm run validate:catalog
 npm run demo
 ```
 
-To install the **currently verified public** prerelease, use `npm install @credonomics/rewards-engine@0.2.0-alpha.2` or the current `@next` tag after checking npm. The source package **prepares `0.2.0-alpha.3`**, including `createBatchReport()`, strict schema validation and two new CLIs; these are not on npm until separate release and registry verification. Run `npm run test:package` in the repository to verify the installable candidate tarball.
+The previously independently verified public prerelease is `0.2.0-alpha.2`. GitHub prerelease `v0.2.0-alpha.3` exists and its npm publishing workflow succeeded, but public registry visibility and current dist-tags have not been independently verified. Check `npm view @credonomics/rewards-engine@0.2.0-alpha.3 version` and `npm dist-tag ls @credonomics/rewards-engine` before installing alpha.3.
 
 Or programmatic usage:
 
@@ -68,14 +68,14 @@ npm run build
 node bin/credorewards.mjs examples/fictional-card.json
 ```
 
-See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for candidate batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
 
 
-## v0.2.0-alpha.3 release candidate (unpublished)
+## v0.2.0-alpha.3 prerelease
 
-Source version `0.2.0-alpha.3` includes `createBatchReport(scenarios)`, a `credorewards-batch` CLI and purpose-built JSON Schema v1 validation via `@credonomics/rewards-engine/catalog-schema-validator` and `credorewards-catalog`. These additions are **not available from the published `0.2.0-alpha.2`** and will reach npm only after separately approved release actions and verification.
+Version `0.2.0-alpha.3` includes `createBatchReport(scenarios)`, the `credorewards-batch` CLI and catalog schema validation. These additions are not available in alpha.2. The [GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.3) exists, and the [tokenless npm workflow](https://github.com/aqdas1820/credorewards-engine/actions/runs/42113496665) succeeded with signed provenance. Independently verify registry visibility before claiming public installability.
 
-From a source checkout of this release candidate:
+From a source checkout:
 
 ```bash
 npm ci
@@ -89,19 +89,19 @@ The schema evaluator covers every keyword currently used in the shipped catalog 
 
 ## npm package status
 
-The most recently **independently verified published** npm prerelease is `0.2.0-alpha.2` under `next`; `latest` remains `0.1.0-alpha.1`. The **unpublished candidate `0.2.0-alpha.3`** contains the new batch and schema features. Existing alpha.2 publication is complete; its GitHub tag and npm package version must not be reused. Check `npm dist-tag ls @credonomics/rewards-engine` and install a pinned version to verify later releases. See [npm publishing](docs/NPM-PUBLISHING.md).
+The previously independently verified npm prerelease was `0.2.0-alpha.2`. The alpha.3 npm publishing workflow succeeded on 2026-11-05 UTC, but registry visibility and the current `next`/`latest` dist-tags have not been independently checked. Check `npm view @credonomics/rewards-engine@0.2.0-alpha.3 version` and `npm dist-tag ls @credonomics/rewards-engine`. Never republish an immutable accepted version. See [npm publishing](docs/NPM-PUBLISHING.md).
 
 ## GitHub prerelease
 
-GitHub prereleases are separate from npm publication. **`v0.2.0-alpha.2` is already released** and must never be recreated or retargeted. The proposed next tag is **`v0.2.0-alpha.3`**. Maintainers may run [Actions → Publish GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) on reviewed, merged `main` only after confirming this tag is unused; the workflow validates and packs the candidate, refuses duplicate tags, and **does not publish npm**.
+GitHub prereleases are separate from npm publication. [`v0.2.0-alpha.3`](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.3) already exists at commit `41b83e165ac3cfc750cc0a4a79c202ac06b00686`; do not recreate or retarget it. The [GitHub prerelease workflow](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) validates and packs new candidates.
 
-**This workflow does not publish to npm.** npm versions must be published and verified independently. See [release notes](docs/RELEASE-NOTES.md).
+**The GitHub prerelease workflow does not itself publish npm.** A separate guarded tokenless npm workflow runs downstream. Verify both its result and public registry state. See [release notes](docs/RELEASE-NOTES.md).
 
 ## Cloud automation (runs without a local PC)
 
 GitHub Actions and Dependabot provide ongoing scheduled SDK checks and dependency-update PRs. The [cloud automation guide](docs/AUTOMATION.md) explains the six-hour maintenance validation, automatic failure/recovery issue tracking and the independently scheduled development task. The automation does **not** require Windows PowerShell to stay open, and cannot claim guaranteed uninterrupted 24/7 operation.
 
-**Release safety:** the optional [guarded auto-release pipeline](docs/AUTOMATED-RELEASE.md) is **disabled by default**. It can create new GitHub prereleases and publish matching npm `next` versions without PowerShell only **after** the npm owner configures the exact Trusted Publisher (OIDC), enables two repository variables and reviews CI/branch protection. Never share credentials in chat. Existing published versions and Git tags are immutable.
+****Release safety:** The [guarded auto-release pipeline](docs/AUTOMATED-RELEASE.md) produced the alpha.3 prerelease and a successful npm workflow run. Consult live repository settings to determine whether it is currently enabled. [Issue #19](https://github.com/aqdas1820/credorewards-engine/issues/19) tracks an existing-tag no-op that can trigger a failed downstream npm run; strict SHA verification blocked publishing. Security-review workflow changes before merging.
 
 ## Ground rules for contributors
 
