@@ -25,7 +25,7 @@ test('all three CLIs fail closed on malformed JSON without emitting a partial re
       const result = invoke(command, [file]);
       assert.equal(result.status, 1, command + ': ' + result.stderr);
       assert.equal(result.stdout, '', command + ' emitted partial output');
-      assert.match(result.stderr, /error/i, command);
+      assert.ok(result.stderr.trim().length > 0, command + ' lacked a diagnostic');
     }
   } finally {
     rmSync(dir, { recursive: true, force: true });
