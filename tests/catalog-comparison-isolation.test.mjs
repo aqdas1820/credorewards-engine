@@ -77,5 +77,5 @@ test('draft review gate blocks a mixed draft/reviewed catalog even with another 
 test('catalog comparisons reject a missing candidate without partial ranking', () => {
   const source = catalog(revision('a'), revision('b'));
   assert.throws(() => compareCatalogCards(source, ['a', 'missing'], spend, 2026,
-    { allowDraft: true }), /no applicable revision/);
+    { allowDraft: true }), /no single revision covers full year/);
 });
