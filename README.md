@@ -101,7 +101,7 @@ GitHub prereleases are separate from npm publication. [`v0.2.0-alpha.3`](https:/
 
 GitHub Actions and Dependabot provide ongoing scheduled SDK checks and dependency-update PRs. The [cloud automation guide](docs/AUTOMATION.md) explains the six-hour maintenance validation, automatic failure/recovery issue tracking and the independently scheduled development task. The automation does **not** require Windows PowerShell to stay open, and cannot claim guaranteed uninterrupted 24/7 operation.
 
-****Release safety:** The [guarded auto-release pipeline](docs/AUTOMATED-RELEASE.md) produced the alpha.3 prerelease and a successful npm workflow run. Consult live repository settings to determine whether it is currently enabled. [Issue #19](https://github.com/aqdas1820/credorewards-engine/issues/19) tracks an existing-tag no-op that can trigger a failed downstream npm run; strict SHA verification blocked publishing. Security-review workflow changes before merging.
+**Release safety:** The [guarded auto-release pipeline](docs/AUTOMATED-RELEASE.md) produced the alpha.3 prerelease and a successful npm workflow run. Consult live repository settings to determine whether it is currently enabled. [Issue #19](https://github.com/aqdas1820/credorewards-engine/issues/19) tracks an existing-tag no-op that can trigger a failed downstream npm run; strict SHA verification blocked publishing. Security-review workflow changes before merging.
 
 ## Ground rules for contributors
 
