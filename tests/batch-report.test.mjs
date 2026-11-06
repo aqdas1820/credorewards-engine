@@ -149,3 +149,32 @@ test('reports limitations rather than implying card allocation or actual issuer 
   assert.match(note, /calendar months are not issuer statement cycles/i);
   assert.match(note, /independent/i);
 });
+
+test('calendar summaries stay within their own year, including leap years', () => {
+  for (const year of [2024, 2025, 2028]) {
+    const scenario = clone(example.scenarios[0]);
+    scenario.id = `calendar-${year}`;
+    scenario.year = year;
+    scenario.transactions = [
+      { id: 'first', month: `${year}-01`, category: 'groceries', amountPaise: 101 },
+      { id: 'last', month: `${year}-12`, category: 'utilities', amountPaise: 99 }
+    ];
+    const report = createBatchReport([scenario]);
+    const entry = report.scenarios[0];
+    assert.equal(entry.year, year);
+    for (const card of entry.monthlyByCard) {
+      assert.equal(card.months.length, 12);
+      assert.deepEqual(card.months.map(month => month.month),
+        Array.from({ length: 12 }, (_, index) =>
+          `${year}-${String(index + 1).padStart(2, '0')}`));
+      assert.equal(card.months[0].transactionCount, 1);
+      assert.equal(card.months[11].transactionCount, 1);
+      assert.ok(card.months.slice(1, 11).every(month =>
+        month.transactionCount === 0 && month.totalSpendPaise === 0 &&
+        month.totalRewardsPaise === 0));
+      assert.equal(card.months.reduce((total, month) => total + month.totalSpendPaise, 0),
+        entry.comparison.entries.find(candidate => candidate.cardId === card.cardId)
+          .calculation.totalSpendPaise);
+    }
+  }
+});
