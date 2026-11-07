@@ -63,10 +63,25 @@ try {
     "const s = require('@credonomics/rewards-engine/schemas/rule-catalog.v1.schema.json'); if (s.properties?.schemaVersion?.const !== 1) process.exit(1);"
   ], temp);
 
-  const shim = join(temp, 'node_modules', '.bin', process.platform === 'win32'
-    ? 'credorewards.cmd'
-    : 'credorewards');
-  assert.ok(existsSync(shim), 'npm did not create a CLI executable shim');
+  // Check the actual npm-installed entrypoints, not just package.json's bin map.
+  // A missing bundled script or npm shim would break consumers even if direct
+  // invocations of source-tree scripts and library imports continue to pass.
+  for (const [command, script] of Object.entries({
+    credorewards: 'bin/credorewards.mjs',
+    'credorewards-batch': 'bin/credorewards-batch.mjs',
+    'credorewards-catalog': 'bin/credorewards-catalog.mjs'
+  })) {
+    assert.equal(metadata.bin?.[command], script, command + ' bin mapping missing');
+    assert.ok(existsSync(join(installedDir, ...script.split('/'))),
+      command + ' script missing from installed package');
+    const shimName = process.platform === 'win32' ? command + '.cmd' : command;
+    const shim = join(temp, 'node_modules', '.bin', shimName);
+    assert.ok(existsSync(shim), command + ' npm executable shim missing');
+    // Execute the consumer-facing shim, not just its underlying JS script.
+    // Windows .cmd launchers require a shell; POSIX shims run directly.
+    const helpFromShim = run(shim, ['--help'], temp, process.platform === 'win32');
+    assert.match(helpFromShim, new RegExp('Usage: ' + command));
+  }
 
   const help = run(process.execPath, [join(installedDir, 'bin', 'credorewards.mjs'), '--help'], temp);
   assert.match(help, /Usage: credorewards/);
