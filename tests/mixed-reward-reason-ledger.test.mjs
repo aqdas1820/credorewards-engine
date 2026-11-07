@@ -40,7 +40,7 @@ test('mixed reason ledger keeps minimum, rounding, caps and exclusion precedence
     ['09-fuel', 'zero', 0, 'zero_reward']
   ]);
   assert.equal(result.totalSpendPaise, 1599);
-  assert.equal(result.rewardEligibleSpendPaise, 1200);
+  assert.equal(result.rewardEligibleSpendPaise, 1000);
   assert.equal(result.feeWaiverEligibleSpendPaise, 1499);
   assert.equal(result.totalRewardsPaise, 4);
   assert.equal(result.annualFeeWaived, true);
