@@ -66,6 +66,31 @@ test('offline dashboard binds loopback and serves only explicit assets, no uploa
     const head = await fetch(address + '/web/app.mjs', { method: 'HEAD' });
     assert.equal(head.status, 200);
     assert.equal(await head.text(), '');
+
+    // The local preview is read-only even on error paths; no request can
+    // accidentally expose repository files, set tracking cookies, or upload data.
+    for (const [path, status] of [
+      ['/package-lock.json', 404],
+      ['/.env', 404],
+      ['/dist/../package.json', 404],
+      ['/web/%2e%2e/package.json', 404],
+      ['/web/app.mjs?cache=1', 200]
+    ]) {
+      const response = await fetch(address + path);
+      assert.equal(response.status, status, path);
+      assert.equal(response.headers.get('cache-control'), 'no-store', path);
+      assert.equal(response.headers.get('referrer-policy'), 'no-referrer', path);
+      assert.equal(response.headers.get('x-content-type-options'), 'nosniff', path);
+      assert.match(response.headers.get('content-security-policy'), /connect-src 'none'/, path);
+      assert.equal(response.headers.get('set-cookie'), null, path);
+    }
+    for (const method of ['PUT', 'PATCH', 'DELETE']) {
+      const response = await fetch(address + '/', { method });
+      assert.equal(response.status, 405, method);
+      assert.equal(response.headers.get('allow'), 'GET, HEAD', method);
+      assert.equal(response.headers.get('cache-control'), 'no-store', method);
+      assert.equal(response.headers.get('set-cookie'), null, method);
+    }
   } finally {
     child.kill('SIGTERM');
   }
