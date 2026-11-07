@@ -11,7 +11,9 @@ const files = [
   'web/app.mjs',
   'web/scoreboard.mjs',
   'web/local-import.mjs',
+  'web/purchase-input.mjs',
   'dist/index.js',
+  'dist/purchase-impact.js',
   'dist/batch.js',
   'dist/catalog.js',
   'dist/catalog-audit.js'
