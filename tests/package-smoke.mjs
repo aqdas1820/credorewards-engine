@@ -77,6 +77,10 @@ try {
     const shimName = process.platform === 'win32' ? command + '.cmd' : command;
     const shim = join(temp, 'node_modules', '.bin', shimName);
     assert.ok(existsSync(shim), command + ' npm executable shim missing');
+    // Execute the consumer-facing shim, not just its underlying JS script.
+    // Windows .cmd launchers require a shell; POSIX shims run directly.
+    const helpFromShim = run(shim, ['--help'], temp, process.platform === 'win32');
+    assert.match(helpFromShim, new RegExp('Usage: ' + command));
   }
 
   const help = run(process.execPath, [join(installedDir, 'bin', 'credorewards.mjs'), '--help'], temp);
