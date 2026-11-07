@@ -2,7 +2,7 @@
 // Build a static-only, read-only public DEMO. No server/API or user data collection.
 import { cp, mkdir, rm, readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const output = join(root, 'site-dist');
@@ -20,7 +20,7 @@ for (const file of files) {
   const source = resolve(root, file);
   const relative = file === 'web/index.html' ? 'index.html' : file;
   const destination = resolve(output, relative);
-  if (!source.startsWith(root + '/') || !destination.startsWith(output + '/')) {
+  if (!source.startsWith(root + sep) || !destination.startsWith(output + sep)) {
     throw new Error('Unexpected build path');
   }
   await mkdir(dirname(destination), { recursive: true });
