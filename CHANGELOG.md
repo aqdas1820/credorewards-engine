@@ -4,6 +4,8 @@ User-visible changes merged after the `v0.2.0-alpha.3` tag are recorded under **
 
 ## Unreleased (source on `main`; not a new npm release)
 
+- Align README presentation with the CredoNomics Cyber Solutions product-family layout, using owner-supplied CredoRewards and parent-company artwork, centralized documentation navigation, and brand-use guidance.
+
 - Add experimental `comparePurchaseImpact()` reporting to compare annual cashback and fee-waiver changes from one hypothetical extra transaction, including shared-cap displacement.
 - Add a local-first browser what-if purchase form with exact rupee-to-paise conversion, collision-free synthetic transaction IDs and before/after impact summaries.
 - Harden static browser builds by shipping all required SDK ESM modules and verifying import closure before deployment.
