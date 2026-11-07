@@ -1,3 +1,5 @@
+export { comparePurchaseImpact } from './purchase-impact.js';
+export type { PurchaseImpactEntry, PurchaseImpactResult } from './purchase-impact.js';
 export { summarizeStatementCycleSpend } from './statement-cycles.js';
 export type { DatedSpendTransaction, StatementCycleSpendSummary } from './statement-cycles.js';
 export { createBatchReport } from './batch.js';
