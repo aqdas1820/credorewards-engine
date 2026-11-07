@@ -11,7 +11,7 @@ Visit `http://127.0.0.1:4173` in your browser. The command builds the SDK before
 
 - The ranked results table shows card name, rank, cashback, fees and net annual value in rupees. Ties remain tied; the exact SDK audit JSON stays underneath. Card names are displayed as text, never interpreted as HTML.
 - Paste or edit JSON containing `year`, two or more `cards`, and `transactions` in **integer paise**; click **Compare cards**.
-- The initial scenario uses two completely fictional cards. It is an annual, all-spend-on-one-card comparison and does not import, upload, or authenticate statements or bank data.
+- The initial scenario uses two completely fictional cards. You can load a local JSON scenario (maximum 128 KiB) using the file picker; parsing and SDK validation happen entirely in your browser, without uploads or network requests. Do not load real banking statements or credentials. It remains an annual, all-spend-on-one-card comparison.
 - The HTTP server binds exclusively to `127.0.0.1` and only serves the listed dashboard files and built SDK modules. It has no write/upload endpoints, stores no scenarios, and sends a restrictive CSP with `connect-src 'none'` to prevent page-initiated API calls.
 - Browser display uses `textContent`, not HTML injection. No external CSS, scripts, fonts, analytics, or network dependencies are required for the dashboard itself.
 
