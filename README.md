@@ -1,128 +1,153 @@
 # CredoRewards Engine
 
-[![TypeScript CI](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript CI](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Status: Experimental Alpha](https://img.shields.io/badge/status-experimental%20alpha-amber)](docs/PRODUCTION-READINESS.md)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933)](package.json)
 
-**A transparent, deterministic credit-card cashback rules SDK for India's fintech builders.**
+**Explainable credit-card cashback calculations for India-focused fintech developers.**
 
-Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credonomics.in)
+CredoRewards is a dependency-free TypeScript runtime library for deterministic, integer-paise cashback calculations, auditable card comparisons and hypothetical purchase-impact analysis. It also includes CLI tooling, catalog validation, synthetic examples and a browser demo.
 
-> **Experimental alpha, published to npm under the `next` dist-tag.** This starter is not connected to banks or payment networks. All sample card rules are fictional. Do not use the output for financial decisions without independently validating issuer terms and the complete calculation period.
+**Maintained by [CredoNomics Investment Solutions](https://credonomics.in)** · [Issues](https://github.com/aqdas1820/credorewards-engine/issues) · [Changelog](CHANGELOG.md) · [Roadmap](docs/ROADMAP.md)
 
-## What this MVP does
+> [!IMPORTANT]
+> **Experimental SDK and fictional examples—not a bank integration or financial recommendation service.** No verified issuer rates, MCC inference, bank connectivity or payment credentials are bundled. Actual annual-fee comparisons require **complete-year spending** and independently validated card terms. See [production readiness](docs/PRODUCTION-READINESS.md).
 
-- Integer-paise cashback (avoids floating-point currency errors)
-- Category-based rewards and wildcard fallback
-- Monthly and annual reward caps per rule
-- Reward exclusions and minimum transaction amounts
-- Annual-fee waivers with separate qualifying-spend exclusions
-- Transaction-by-transaction explanations and a net annual value estimate
-- Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
-- Experimental source-only per-purchase marginal impact report: transaction cashback versus actual annual reward delta after shared caps and fee-waiver changes
-- Experimental dated rule-catalog metadata, provenance and review-gated version resolution (published in v0.2.0-alpha.1)
-- Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (published in v0.2.0-alpha.2)
-- Strict bundled catalog v1 schema validation and multi-scenario monthly batch reports (in the v0.2.0-alpha.3 GitHub prerelease; npm workflow succeeded, registry visibility unverified)
-- Pure TypeScript with **zero runtime dependencies**, CLI, tests and GitHub Actions CI
+## At a glance
 
-## What it does **not** do (yet)
+| What is available | What's not available yet |
+| --- | --- |
+| Cashback rules, minimum spends, exclusions and monthly/annual caps | Verified real-bank rewards catalog and live bank connections |
+| Annual fee/waiver modeling and independent multi-card ranking | Real wallet spend allocation or merchant-specific card recommendations |
+| Auditable purchase what-if analysis using before/after calculations | Loyalty-point redemption valuation, offers, full issuer statement-cycle math |
+| Versioned rule-catalog metadata and validation | General-purpose JSON Schema support and source-authenticated issuer terms |
+| Offline CLI, synthetic browser dashboard, automated cross-platform tests | Production-certified service, account storage or customer-data processing |
 
-Reward point valuations, MCC detection, accelerated tiers, merchant offers, GST calculation, fee reversals, spend thresholds within statement cycles, welcome/milestone benefits, international exchange charges, fuel surcharges, balance and redemption restrictions, or any live bank rules. Fees must be supplied inclusive of relevant taxes. Calculations assume **complete annual spending** for fee-waiver evaluations. Do not treat a partial year as complete.
+**Design principles:** deterministic outputs, explicit assumptions, immutable caller inputs, fail-closed validation and integer-paise arithmetic. See [architecture](docs/ARCHITECTURE.md) for component boundaries.
 
 ## Quick start
 
-Requires Node.js 20+ and TypeScript 5.8+ for building.
+Requires **Node.js 20+** and npm. To run the latest source version without assuming an npm prerelease is publicly available:
 
 ```bash
-npm install
+git clone https://github.com/aqdas1820/credorewards-engine.git
+cd credorewards-engine
+npm ci --ignore-scripts
 npm test
-npm run validate:catalog
 npm run demo
 ```
 
-Standalone offline Node.js integration example (fictional cards only):
-
-```bash
-npm run build
-node examples/node-consumer.mjs
-```
-
-The previously independently verified public prerelease is `0.2.0-alpha.2`. GitHub prerelease `v0.2.0-alpha.3` exists and its npm publishing workflow succeeded, but public registry visibility and current dist-tags have not been independently verified. Check `npm view @credonomics/rewards-engine@0.2.0-alpha.3 version` and `npm dist-tag ls @credonomics/rewards-engine` before installing alpha.3.
-
-Or programmatic usage:
+**SDK example — fictional cashback**
 
 ```ts
 import { calculateRewards } from '@credonomics/rewards-engine';
 
 const card = {
-  id: 'fictional', name: 'Fictional Demo Card', annualFeePaise: 50000,
-  excludedCategories: ['rent'],
-  rules: [
-    { id: 'grocery', category: 'groceries', rateBps: 500, monthlyCapPaise: 10000 },
-    { id: 'base', category: '*', rateBps: 100 }
-  ]
+  id: 'sample-card',
+  name: 'Fictional Cashback Card',
+  annualFeePaise: 0,
+  rules: [{ id: 'groceries', category: 'groceries', rateBps: 500 }]
 };
+
 const transactions = [
-  { id: '1', month: '2026-01', category: 'groceries', amountPaise: 100000 }
+  { id: 't-001', month: '2026-01', category: 'groceries', amountPaise: 100000 }
 ];
+
 const result = calculateRewards(card, transactions, 2026);
-console.log(result.totalRewardsPaise, result.netAnnualValuePaise);
+console.log(result.totalRewardsPaise); // 5000 paise = ₹50.00
 ```
 
-Amounts are in **paise**: `100000` paise = ₹1,000; `rateBps: 500` = 5%.
+Money is always represented in **integer paise**. `rateBps: 500` means 5% (500 basis points). The code above is a minimal illustration, **not a full-year personal recommendation**.
 
-CLI:
+For an independently packaged npm consumer, verify the registry version and dist-tags first:
 
 ```bash
-npm run build
-node bin/credorewards.mjs examples/fictional-card.json
+npm view @credonomics/rewards-engine versions --json
+npm dist-tag ls @credonomics/rewards-engine
 ```
 
-See [PURCHASE-IMPACT.md](docs/PURCHASE-IMPACT.md) for reporting-only purchase deltas, [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+See [npm publishing notes](docs/NPM-PUBLISHING.md) before choosing an experimental package version. Source code on `main` may contain unreleased APIs.
 
+## APIs and tools
 
-## v0.2.0-alpha.3 prerelease
+| Component | Purpose | Documentation |
+| --- | --- | --- |
+| `calculateRewards()` | Per-transaction cashback, caps, reasons and net annual value | [Reward rules](docs/RULE-SCHEMA.md) |
+| `compareCards()` | Rank candidate cards using **independent** full-year scenarios | [Card comparison](docs/CARD-COMPARISON.md) |
+| `comparePurchaseImpact()` | Compare changes caused by one hypothetical additional transaction | [Purchase impact](docs/PURCHASE-IMPACT.md) |
+| `createBatchReport()` | Independent scenario reports and calendar-month summaries | [Batch reports](docs/BATCH-REPORTS.md) |
+| Rule-catalog APIs | Validate dated revisions, audit updates, resolve annual terms | [Catalog governance](docs/CATALOG-GOVERNANCE.md) |
+| `summarizeStatementCycleSpend()` | Assumed statement-cycle **spend grouping only**; no rewards math | [Statement cycles](docs/STATEMENT-CYCLES.md) |
+| Three CLI commands | Single-card, catalog and batch workflows | [Examples](examples/) |
 
-Version `0.2.0-alpha.3` includes `createBatchReport(scenarios)`, the `credorewards-batch` CLI and catalog schema validation. These additions are not available in alpha.2. The [GitHub prerelease](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.3) exists, and the [tokenless npm workflow](https://github.com/aqdas1820/credorewards-engine/actions/runs/42113496665) succeeded with signed provenance. Independently verify registry visibility before claiming public installability.
+The browser dashboard uses the same SDK calculations as the CLI; it is not a second rewards engine.
 
-From a source checkout:
+### Browser demo
 
 ```bash
-npm ci
+npm run demo:web
+```
+
+Open **http://127.0.0.1:4173** for a local synthetic-card comparison, JSON scenario import and hypothetical purchase form. No bank credentials or real customer statements should be entered. A static Vercel deployment is also configured, but access may require Vercel authentication; **deployment success is not proof of public access**.
+
+Learn more: [Browser demo](docs/WEB-DEMO.md) · [Static deployment](docs/STATIC-DEPLOYMENT.md).
+
+### Development checks
+
+```bash
+npm run typecheck
 npm test
 npm run test:package
 npm run validate:catalog
-npm run demo:batch
+npm run build:web
 ```
 
-The schema evaluator covers every keyword currently used in the shipped catalog schema but does **not** process arbitrary JSON Schema documents. The batch report compares hypothetical cards independently per scenario and does not optimize card spend allocation. See the linked design docs for financial and provenance boundaries.
+PRs are validated by a **five-job Windows/Linux GitHub Actions matrix**, including installed-package smoke tests. Check the [latest CI results](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml) rather than assuming a green badge verifies a particular commit.
 
-## npm package status
+## Architecture
 
-The previously independently verified npm prerelease was `0.2.0-alpha.2`. The alpha.3 npm publishing workflow succeeded on 2026-11-05 UTC, but registry visibility and the current `next`/`latest` dist-tags have not been independently checked. Check `npm view @credonomics/rewards-engine@0.2.0-alpha.3 version` and `npm dist-tag ls @credonomics/rewards-engine`. Never republish an immutable accepted version. See [npm publishing](docs/NPM-PUBLISHING.md).
+```text
+Caller-provided, fictional or independently verified card terms
+                            +
+              Transaction history (integer paise)
+                            |
+                            v
+            TypeScript validation and rules engine
+                            |
+             +--------------+---------------+
+             |              |               |
+       Annual results  Card comparison  Purchase impact
+             |              |               |
+             +--------------+---------------+
+                            |
+             CLI / local browser demo / SDK consumer
+```
 
-## GitHub prerelease
+This repository has **no production banking backend**. For directory layout, financial invariants, security boundaries and release architecture, read [Architecture](docs/ARCHITECTURE.md).
 
-GitHub prereleases are separate from npm publication. [`v0.2.0-alpha.3`](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.3) already exists at commit `41b83e165ac3cfc750cc0a4a79c202ac06b00686`; do not recreate or retarget it. The [GitHub prerelease workflow](https://github.com/aqdas1820/credorewards-engine/actions/workflows/release.yml) validates and packs new candidates.
+## Documentation
 
-**The GitHub prerelease workflow does not itself publish npm.** A separate guarded tokenless npm workflow runs downstream. Verify both its result and public registry state. See [release notes](docs/RELEASE-NOTES.md).
+| For | Start here |
+| --- | --- |
+| Developers integrating the SDK | [Architecture](docs/ARCHITECTURE.md), [Card comparison](docs/CARD-COMPARISON.md), [Purchase impact](docs/PURCHASE-IMPACT.md) |
+| Catalog authors | [Rule catalog](docs/RULE-CATALOG.md), [Schema validation](docs/SCHEMA-VALIDATION.md), [Governance](docs/CATALOG-GOVERNANCE.md) |
+| Contributors | [Contributing](CONTRIBUTING.md), [Code of conduct](CODE_OF_CONDUCT.md), [Security policy](SECURITY.md) |
+| Maintainers | [CI and automation](docs/AUTOMATION.md), [Release notes](docs/RELEASE-NOTES.md), [Production readiness](docs/PRODUCTION-READINESS.md) |
 
-## Cloud automation (runs without a local PC)
+## Project status and roadmap
 
-GitHub Actions and Dependabot provide ongoing scheduled SDK checks and dependency-update PRs. The [cloud automation guide](docs/AUTOMATION.md) explains the six-hour maintenance validation, automatic failure/recovery issue tracking and the independently scheduled development task. The automation does **not** require Windows PowerShell to stay open, and cannot claim guaranteed uninterrupted 24/7 operation.
+- **Current source package version:** `0.2.0-alpha.3` (see `package.json`).
+- **GitHub release:** [`v0.2.0-alpha.3`](https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.3) is a **prerelease**. The npm trusted-publishing workflow reported success, but public registry visibility and the `next` tag should be checked independently.
+- **Source-only additions:** Some functionality merged after the prerelease is available from the repository but **must not** be assumed to exist in the tagged npm artifact.
+- **Upcoming work:** independently verified issuer data, complete billing and points semantics, security review, and a stable compatibility contract. See [roadmap](docs/ROADMAP.md).
 
-**Release safety:** The [guarded auto-release pipeline](docs/AUTOMATED-RELEASE.md) produced the alpha.3 prerelease and a successful npm workflow run. Consult live repository settings to determine whether it is currently enabled. [Issue #19](https://github.com/aqdas1820/credorewards-engine/issues/19) tracks an existing-tag no-op that can trigger a failed downstream npm run; strict SHA verification blocked publishing. Security-review workflow changes before merging.
+**Release verdict:** useful for experimentation, synthetic demos and controlled integration testing; **not approved as a live financial-advice or banking product**.
 
-## Ground rules for contributors
+## Contributing, security and licensing
 
-- No unverified bank/card rewards tables or issuer logos.
-- Cite first-party issuer terms, effective dates and applicability when real card rules are added later.
-- Never commit card numbers, transaction statements, credentials or personal financial data.
-- No scraping requiring bypassing paywalls, credentials or access controls.
-- Prefer reproducible synthetic cases and clear tests for financial math.
+We welcome [bug reports](https://github.com/aqdas1820/credorewards-engine/issues/new/choose), reproducible synthetic test cases and scoped pull requests. Follow [CONTRIBUTING.md](CONTRIBUTING.md) and keep changes to financial rules reviewable. **Never upload real statements, card numbers, credentials, personal data or unaudited issuer tables.**
 
-## License
+Report vulnerabilities **privately** to [support@credonomics.in](mailto:support@credonomics.in), not through public issues. See [SECURITY.md](SECURITY.md).
 
-MIT for the original code in this starter. Actual issuer terms, trademarks and third-party datasets carry their own rights and restrictions.
-
-## Security
-
-Report vulnerabilities privately to support@credonomics.in. Read [SECURITY.md](SECURITY.md).
+Original project code is released under the [MIT License](LICENSE). Bank terms, third-party datasets, logos and trademarks are not granted by that license.
