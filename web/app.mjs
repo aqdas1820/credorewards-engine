@@ -1,4 +1,5 @@
 import { compareCards } from '/dist/index.js';
+import { createScoreboardRows } from '/web/scoreboard.mjs';
 
 const example = {
   year: 2026,
@@ -20,14 +21,45 @@ const example = {
 const input = document.getElementById('payload');
 const output = document.getElementById('result');
 const status = document.getElementById('status');
+const scoreboard = document.getElementById('scoreboard');
+
+function showScoreboard(comparison) {
+  // Construct text nodes only; never interpret user-supplied names as HTML.
+  const table = document.createElement('table');
+  const heading = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  for (const label of ['Rank', 'Card', 'Rewards', 'Fee', 'Net value']) {
+    const cell = document.createElement('th');
+    cell.scope = 'col';
+    cell.textContent = label;
+    headerRow.append(cell);
+  }
+  heading.append(headerRow);
+  table.append(heading);
+  const body = document.createElement('tbody');
+  for (const row of createScoreboardRows(comparison)) {
+    const tr = document.createElement('tr');
+    for (const value of [row.rank, row.name, row.rewards, row.fee, row.net]) {
+      const cell = document.createElement('td');
+      cell.textContent = String(value);
+      tr.append(cell);
+    }
+    body.append(tr);
+  }
+  table.append(body);
+  scoreboard.replaceChildren(table);
+}
+
 input.value = JSON.stringify(example, null, 2);
 
 document.getElementById('calculate').addEventListener('click', () => {
   output.textContent = '';
+  scoreboard.replaceChildren();
   try {
     const payload = JSON.parse(input.value);
     // The SDK itself performs strict card, transaction, year and paise validation.
     const result = compareCards(payload.cards, payload.transactions, payload.year);
+    showScoreboard(result);
     output.textContent = JSON.stringify({
       year: result.year,
       leaderCardIds: result.leaderCardIds,
