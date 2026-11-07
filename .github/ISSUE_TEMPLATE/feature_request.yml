@@ -1,0 +1,53 @@
+name: Feature proposal
+description: Propose a scoped, testable improvement to the SDK or developer experience.
+title: "[feat] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the outcome before proposing an implementation. For new card rules, point valuations, merchant/MCC categorization or issuer datasets, include governance and financial-risk considerations.
+        Do not submit real personal transaction data.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Cashback rules / financial semantics
+        - Developer SDK / typed API
+        - Catalog, evidence and validation
+        - Browser demo / accessibility
+        - CI, testing and release reliability
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What developer/user workflow is blocked today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe inputs, outputs, intended error cases and backwards compatibility.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and synthetic tests
+      placeholder: |
+        - [ ] Deterministic with reversed transaction order
+        - [ ] Rejects invalid or unsafe paise inputs
+        - [ ] Documented with fictional examples
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Financial, privacy and release implications
+      description: State whether rates, caps, fees, issuer evidence, customer data, permissions or publishing are affected.
+    validations:
+      required: true
