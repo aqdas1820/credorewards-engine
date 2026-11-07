@@ -13,7 +13,7 @@ h1{margin:0 0 8px;color:#8ee3d2}p{line-height:1.5;color:#bdcadb}main{display:gri
 textarea{background:#0c1525;color:#e7f4fb;width:100%;min-height:380px;padding:12px;border:1px solid #53647c;border-radius:8px;font:13px/1.5 ui-monospace,monospace;resize:vertical}
 button{background:#69e6c4;color:#07261e;border:0;border-radius:7px;font-weight:700;padding:13px 22px;cursor:pointer}
 button:focus-visible,textarea:focus-visible{outline:3px solid #ffda75}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:640px;overflow:auto}
-#status{min-height:1.5em}small{color:#b7c6d8}@media(max-width:760px){main{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px 7px;border-bottom:1px solid #364661;text-align:left}td:nth-child(n+3),th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}th{color:#a7ead7}tbody tr:first-child{background:#1d3c3c}#scoreboard{overflow-x:auto}#status{min-height:1.5em}small{color:#b7c6d8}@media(max-width:760px){main{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -31,7 +31,7 @@ button:focus-visible,textarea:focus-visible{outline:3px solid #ffda75}pre{white-
 <p><button id="calculate" type="button">Compare cards</button></p>
 <p id="status" role="status" aria-live="polite"></p>
 </section>
-<section class="panel"><h2>Calculated results</h2><p>Net annual value includes annual fees. Compare a complete-year, all-spend-on-one-card scenario only.</p>
+<section class="panel"><h2>Calculated results</h2><div id="scoreboard" aria-live="polite" aria-label="Card ranking table"></div><p>Net annual value includes annual fees. Compare a complete-year, all-spend-on-one-card scenario only.</p>
 <pre id="result" aria-label="Reward comparison results">Select Compare cards to run the local engine.</pre>
 </section>
 </main>
