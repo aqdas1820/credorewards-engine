@@ -18,7 +18,8 @@ const assets = [
 
 test('README embeds owner-supplied CredoRewards and parent-company artwork', () => {
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  assert.match(readme, /<h1 align="center">/);
+  assert.match(readme, /<div align="center">/);
+  assert.match(readme, /brand-banner\.webp"[^>]+width="700"/);
   assert.match(readme, /CredoNomics Investment Solutions/);
   assert.match(readme, /experimental alpha/i);
   for (const asset of assets) {
