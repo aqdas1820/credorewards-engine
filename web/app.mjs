@@ -50,9 +50,10 @@ function showScoreboard(comparison) {
   scoreboard.replaceChildren(table);
 }
 
-input.value = JSON.stringify(example, null, 2);
+const exampleJson = JSON.stringify(example, null, 2);
+input.value = exampleJson;
 
-document.getElementById('calculate').addEventListener('click', () => {
+function calculate() {
   output.textContent = '';
   scoreboard.replaceChildren();
   try {
@@ -80,4 +81,12 @@ document.getElementById('calculate').addEventListener('click', () => {
     status.textContent = 'Invalid scenario: ' + (error instanceof Error ? error.message : String(error));
     output.textContent = 'No results produced.';
   }
+}
+
+document.getElementById('calculate').addEventListener('click', calculate);
+document.getElementById('reset').addEventListener('click', () => {
+  input.value = exampleJson;
+  calculate();
 });
+// Display a real SDK comparison immediately; user should not face an empty dashboard.
+calculate();
