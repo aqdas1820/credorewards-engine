@@ -10,6 +10,7 @@ const files = [
   'web/index.html',
   'web/app.mjs',
   'web/scoreboard.mjs',
+  'web/local-import.mjs',
   'dist/index.js',
   'dist/batch.js',
   'dist/catalog.js',
