@@ -4,7 +4,7 @@ import { cp, mkdir, rm, readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, sep } from 'node:path';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const output = join(root, 'site-dist');
 const files = [
   'web/index.html',
