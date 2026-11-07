@@ -10,9 +10,9 @@ test('groups transaction days into inclusive closing-day cycles', () => {
     tx('previous', '2026-01-15', 10), tx('open', '2026-01-16', 80)
   ];
   assert.deepEqual(summarizeStatementCycleSpend(transactions, 15), [
-    { cycleCloseDate: '2026-01-15', transactionCount: 1, totalSpendPaise: 10, transactionIds: ['previous'] },
-    { cycleCloseDate: '2026-02-15', transactionCount: 2, totalSpendPaise: 280, transactionIds: ['close', 'open'] },
-    { cycleCloseDate: '2026-03-15', transactionCount: 1, totalSpendPaise: 40, transactionIds: ['after'] }
+    { cycleStartDate: '2025-12-16', cycleCloseDate: '2026-01-15', transactionCount: 1, totalSpendPaise: 10, transactionIds: ['previous'] },
+    { cycleStartDate: '2026-01-16', cycleCloseDate: '2026-02-15', transactionCount: 2, totalSpendPaise: 280, transactionIds: ['close', 'open'] },
+    { cycleStartDate: '2026-02-16', cycleCloseDate: '2026-03-15', transactionCount: 1, totalSpendPaise: 40, transactionIds: ['after'] }
   ]);
 });
 
@@ -21,8 +21,8 @@ test('clamps close day 31 at February end, including leap-year February 29', () 
     tx('leap-28', '2024-02-28'), tx('leap-29', '2024-02-29'),
     tx('next', '2024-03-01')
   ], 31), [
-    { cycleCloseDate: '2024-02-29', transactionCount: 2, totalSpendPaise: 200, transactionIds: ['leap-28', 'leap-29'] },
-    { cycleCloseDate: '2024-03-31', transactionCount: 1, totalSpendPaise: 100, transactionIds: ['next'] }
+    { cycleStartDate: '2024-02-01', cycleCloseDate: '2024-02-29', transactionCount: 2, totalSpendPaise: 200, transactionIds: ['leap-28', 'leap-29'] },
+    { cycleStartDate: '2024-03-01', cycleCloseDate: '2024-03-31', transactionCount: 1, totalSpendPaise: 100, transactionIds: ['next'] }
   ]);
   assert.equal(summarizeStatementCycleSpend([tx('normal', '2025-02-28')], 31)[0].cycleCloseDate,
     '2025-02-28');
@@ -32,8 +32,27 @@ test('supports a year boundary without evaluating any annual card fees', () => {
   assert.deepEqual(summarizeStatementCycleSpend([
     tx('dec', '2025-12-16', 0), tx('jan', '2026-01-15', 999)
   ], 15), [
-    { cycleCloseDate: '2026-01-15', transactionCount: 2, totalSpendPaise: 999, transactionIds: ['dec', 'jan'] }
+    { cycleStartDate: '2025-12-16', cycleCloseDate: '2026-01-15', transactionCount: 2, totalSpendPaise: 999, transactionIds: ['dec', 'jan'] }
   ]);
+});
+
+test('cycle start is after previous close when shorter months clamp day 30', () => {
+  const groups = summarizeStatementCycleSpend([
+    tx('feb', '2025-02-28'), tx('march', '2025-03-01'),
+    tx('april', '2025-04-01')
+  ], 30);
+  assert.deepEqual(groups.map(({ cycleStartDate, cycleCloseDate, transactionIds }) =>
+    [cycleStartDate, cycleCloseDate, transactionIds]), [
+    ['2025-01-31', '2025-02-28', ['feb']],
+    ['2025-03-01', '2025-03-30', ['march']],
+    ['2025-03-31', '2025-04-30', ['april']]
+  ]);
+});
+
+test('day-one closing cycles start on the second day of the previous month', () => {
+  const cycle = summarizeStatementCycleSpend([tx('first', '2026-01-01')], 1)[0];
+  assert.equal(cycle.cycleStartDate, '2025-12-02');
+  assert.equal(cycle.cycleCloseDate, '2026-01-01');
 });
 
 test('is independent of input order and does not mutate transactions', () => {
