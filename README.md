@@ -1,10 +1,7 @@
-<h1 align="center">
-  <img src="docs/public/credorewards-brand-banner.webp" alt="CredoNomics Investment Solutions presents CredoRewards — Rewards and Loyalty Platform" width="600">
-</h1>
-
-<p align="center">
-  <a href="https://credonomics.in"><img src="docs/public/credonomics-parent-product-badge.webp" alt="A CredoNomics Product" width="276"></a>
-</p>
+<div align="center">
+  <img src="docs/public/credorewards-brand-banner.webp" alt="CredoNomics Investment Solutions presents CredoRewards — Rewards and Loyalty Platform" width="700">
+  <p><a href="https://credonomics.in"><img src="docs/public/credonomics-parent-product-badge.webp" alt="A CredoNomics Product" width="292"></a></p>
+</div>
 
 <p align="center">
   <strong>Transparent, deterministic cashback calculations for fintech developers.</strong><br>
