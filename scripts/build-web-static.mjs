@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+// Build a static-only, read-only public DEMO. No server/API or user data collection.
+import { cp, mkdir, rm, readFile, readdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, resolve, sep } from 'node:path';
+
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const output = join(root, 'site-dist');
+const files = [
+  'web/index.html',
+  'web/app.mjs',
+  'web/scoreboard.mjs',
+  'dist/index.js',
+  'dist/batch.js',
+  'dist/catalog.js',
+  'dist/catalog-audit.js'
+];
+await rm(output, { recursive: true, force: true });
+for (const file of files) {
+  const source = resolve(root, file);
+  const relative = file === 'web/index.html' ? 'index.html' : file;
+  const destination = resolve(output, relative);
+  if (!source.startsWith(root + sep) || !destination.startsWith(output + sep)) {
+    throw new Error('Unexpected build path');
+  }
+  await mkdir(dirname(destination), { recursive: true });
+  await cp(source, destination);
+}
+const html = await readFile(join(output, 'index.html'), 'utf8');
+if (!html.includes('/web/app.mjs')) throw new Error('Missing browser entrypoint');
+const top = (await readdir(output)).sort();
+if (JSON.stringify(top) !== JSON.stringify(['dist', 'index.html', 'web'])) {
+  throw new Error('Unexpected static output contents');
+}
+console.log('Built standalone static demo assets: ' + files.length);
