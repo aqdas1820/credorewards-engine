@@ -27,6 +27,37 @@ console.log(calculateRewards(card, transactions, 2026).totalRewardsPaise);
 - Output preserves caller ordering and is a fresh collection of `Transaction` objects.
 - The original transactions and mapping rules are not mutated.
 
+
+## End-to-end synthetic comparison and reporting
+
+The mapped transactions can be handed directly to the **existing**
+`compareCards()` and `createBatchReport()` functions. No additional
+bank-specific rate lookup, card selection or statement-cycle inference occurs.
+
+```js
+import { mapMccTransactions, compareCards, createBatchReport } from '@credonomics/rewards-engine';
+
+const mapped = mapMccTransactions(
+  [{ id: 'sample', month: '2026-01', mcc: '0123', amountPaise: 10000 }],
+  [{ mcc: '0123', category: 'groceries' }] // synthetic, not an issuer mapping
+);
+const cards = [
+  { id: 'one', name: 'Fictional One', annualFeePaise: 0,
+    rules: [{ id: 'base', category: '*', rateBps: 100 }] },
+  { id: 'two', name: 'Fictional Two', annualFeePaise: 0,
+    rules: [{ id: 'base', category: '*', rateBps: 200 }] }
+];
+const comparison = compareCards(cards, mapped, 2026);
+const report = createBatchReport([{ id: 'example', year: 2026,
+  cards, transactions: mapped }]);
+console.log(comparison.leaderCardIds, report.scenarios[0].monthlyByCard);
+```
+
+The integration regression test verifies strict fail-closed handling of unknown
+MCCs, per-rule caps, card ranking, and calendar-month/annual reconciliation.
+This adapter cannot validate the truth, eligibility, or date applicability of
+caller-supplied MCC assignments; that requires external issuer evidence.
+
 **Important limitations:** Card networks, issuers, aggregators and acquiring banks
 may classify the same merchant differently. This helper does not validate whether
 an MCC was actually assigned or whether an issuer treats that code as eligible.
