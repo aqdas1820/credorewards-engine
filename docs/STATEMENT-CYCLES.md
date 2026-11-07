@@ -14,10 +14,13 @@ const groups = summarizeStatementCycleSpend([
 ], 15);
 
 // Both transactions are assigned to the cycle closing 2026-02-15.
-// [{ cycleCloseDate: '2026-02-15', transactionCount: 2,
+// [{ cycleStartDate: '2026-01-16', cycleCloseDate: '2026-02-15', transactionCount: 2,
 //    totalSpendPaise: 125000, transactionIds: ['fictional-feb', 'fictional-jan'] }]
 ```
 
+- Each group exposes both inclusive `cycleStartDate` and `cycleCloseDate`.
+  The start is the calendar day immediately after the previous month's
+  clamped close day; e.g. February 28 to March 30 gives a March 1 start.
 - `closingDay` must be an integer 1–31, and the close day is inclusive.
   If it is absent in a short month, the cycle closes on the final calendar
   day of that month (including leap-year February 29).
