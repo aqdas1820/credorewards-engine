@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible SDK, CLI, browser demo or documentation defect using synthetic inputs.
+title: "[bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve CredoRewards. Use **fictional data only**.
+        Do not paste real statements, card numbers, PAN, CVV, account identifiers, credentials or private issuer data.
+        Security reports belong at support@credonomics.in, not in public GitHub issues.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected component
+      options:
+        - SDK financial calculation
+        - Card comparison / purchase impact
+        - Catalog validation / schema
+        - CLI / packaged SDK
+        - Browser demo
+        - Documentation / tooling
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+      description: List the exact steps, sample inputs and commands. Avoid real card terms.
+      placeholder: |
+        1. Use fictional card with 5% rate and ₹100 cap
+        2. Run npm test or a documented API call
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment and version
+      description: Node.js/npm/OS and exact git SHA or prerelease version when relevant.
+      placeholder: "Node 24, Windows 11, commit abc1234"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or test output (optional)
+      render: shell
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Safety checklist
+      options:
+        - label: This report contains only synthetic or public non-sensitive information.
+          required: true
