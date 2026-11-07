@@ -37,6 +37,9 @@ test('offline dashboard binds loopback and serves only explicit assets, no uploa
     const app = await fetch(address + '/web/app.mjs');
     assert.equal(app.status, 200);
     assert.match(await app.text(), /compareCards/);
+    const scoreboard = await fetch(address + '/web/scoreboard.mjs');
+    assert.equal(scoreboard.status, 200);
+    assert.match(await scoreboard.text(), /formatPaiseAsRupees/);
     const sdk = await fetch(address + '/dist/index.js');
     assert.equal(sdk.status, 200);
     assert.match(await sdk.text(), /function compareCards/);
