@@ -10,7 +10,7 @@ test('public demo output only includes reviewed static files and browser SDK', (
   execFileSync(process.execPath, [join(root, 'scripts/build-web-static.mjs')], { cwd: root });
   const output = join(root, 'site-dist');
   assert.deepEqual(readdirSync(output).sort(), ['dist', 'index.html', 'web']);
-  assert.deepEqual(readdirSync(join(output, 'web')).sort(), ['app.mjs', 'scoreboard.mjs']);
+  assert.deepEqual(readdirSync(join(output, 'web')).sort(), ['app.mjs', 'local-import.mjs', 'scoreboard.mjs']);
   assert.deepEqual(readdirSync(join(output, 'dist')).sort(),
     ['batch.js', 'catalog-audit.js', 'catalog.js', 'index.js']);
   const html = readFileSync(join(output, 'index.html'), 'utf8');
