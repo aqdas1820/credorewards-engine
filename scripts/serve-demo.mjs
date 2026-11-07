@@ -12,6 +12,7 @@ const files = new Map([
   ['/web/purchase-input.mjs', ['../web/purchase-input.mjs', 'text/javascript; charset=utf-8']],
   ['/dist/index.js', ['../dist/index.js', 'text/javascript; charset=utf-8']],
   ['/dist/purchase-impact.js', ['../dist/purchase-impact.js', 'text/javascript; charset=utf-8']],
+  ['/dist/statement-cycles.js', ['../dist/statement-cycles.js', 'text/javascript; charset=utf-8']],
   ['/dist/batch.js', ['../dist/batch.js', 'text/javascript; charset=utf-8']],
   ['/dist/catalog.js', ['../dist/catalog.js', 'text/javascript; charset=utf-8']],
   ['/dist/catalog-audit.js', ['../dist/catalog-audit.js', 'text/javascript; charset=utf-8']]

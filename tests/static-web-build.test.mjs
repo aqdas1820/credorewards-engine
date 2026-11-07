@@ -12,13 +12,38 @@ test('public demo output only includes reviewed static files and browser SDK', (
   assert.deepEqual(readdirSync(output).sort(), ['dist', 'index.html', 'web']);
   assert.deepEqual(readdirSync(join(output, 'web')).sort(), ['app.mjs', 'local-import.mjs', 'purchase-input.mjs', 'scoreboard.mjs']);
   assert.deepEqual(readdirSync(join(output, 'dist')).sort(),
-    ['batch.js', 'catalog-audit.js', 'catalog.js', 'index.js', 'purchase-impact.js']);
+    ['batch.js', 'catalog-audit.js', 'catalog.js', 'index.js', 'purchase-impact.js', 'statement-cycles.js']);
   const html = readFileSync(join(output, 'index.html'), 'utf8');
   assert.match(html, /Offline SDK Demo/);
   assert.match(html, /src="\/web\/app\.mjs"/);
   assert.match(readFileSync(join(output, 'web/app.mjs'), 'utf8'), /compareCards/);
   assert.match(readFileSync(join(output, 'web/app.mjs'), 'utf8'), /comparePurchaseImpact/);
   assert.match(readFileSync(join(output, 'index.html'), 'utf8'), /id="compare-purchase"/);
+  // Browser ESM eagerly resolves ALL re-exported SDK modules, not just functions
+  // called by the dashboard. Catch missing imports before deploying static assets.
+  const pending = ['web/app.mjs'];
+  const visited = new Set();
+  while (pending.length) {
+    const asset = pending.pop();
+    if (visited.has(asset)) continue;
+    visited.add(asset);
+    const source = readFileSync(join(output, asset), 'utf8');
+    const imports = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"\n]*?\s+from\s+)?['"]([^'"]+)['"]/g;
+    for (const match of source.matchAll(imports)) {
+      const specifier = match[1];
+      assert.ok(specifier.startsWith('/') || specifier.startsWith('./') ||
+        specifier.startsWith('../'), 'Unexpected bare or remote browser import: ' + specifier);
+      const resolved = specifier.startsWith('/')
+        ? specifier.slice(1)
+        : new URL(specifier, 'https://demo.invalid/' + asset).pathname.slice(1);
+      assert.ok(!resolved.startsWith('../'), 'Import escapes static root: ' + specifier);
+      assert.ok(existsSync(join(output, resolved)),
+        asset + ' imports missing static module ' + specifier);
+      if (resolved.endsWith('.js') || resolved.endsWith('.mjs')) pending.push(resolved);
+    }
+  }
+  assert.ok(visited.has('dist/statement-cycles.js'),
+    'Re-exported statement cycle module must be reachable in static bundle');
   assert.ok(!existsSync(join(output, 'package.json')));
   assert.ok(!existsSync(join(output, 'scripts/serve-demo.mjs')));
   const config = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf8'));

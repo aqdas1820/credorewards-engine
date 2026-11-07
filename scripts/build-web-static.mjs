@@ -14,6 +14,7 @@ const files = [
   'web/purchase-input.mjs',
   'dist/index.js',
   'dist/purchase-impact.js',
+  'dist/statement-cycles.js',
   'dist/batch.js',
   'dist/catalog.js',
   'dist/catalog-audit.js'
