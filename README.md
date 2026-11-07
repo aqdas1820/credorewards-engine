@@ -37,6 +37,13 @@ npm run validate:catalog
 npm run demo
 ```
 
+Standalone offline Node.js integration example (fictional cards only):
+
+```bash
+npm run build
+node examples/node-consumer.mjs
+```
+
 The previously independently verified public prerelease is `0.2.0-alpha.2`. GitHub prerelease `v0.2.0-alpha.3` exists and its npm publishing workflow succeeded, but public registry visibility and current dist-tags have not been independently verified. Check `npm view @credonomics/rewards-engine@0.2.0-alpha.3 version` and `npm dist-tag ls @credonomics/rewards-engine` before installing alpha.3.
 
 Or programmatic usage:
