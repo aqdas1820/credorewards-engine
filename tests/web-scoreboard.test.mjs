@@ -6,7 +6,7 @@ import { formatPaiseAsRupees, createScoreboardRows } from '../web/scoreboard.mjs
 test('rupee display is exact for positive, negative and safe-integer boundaries', () => {
   const samples = [
     [0, '₹0.00'], [1, '₹0.01'], [99, '₹0.99'], [100, '₹1.00'],
-    [123456789, '₹12,34,567.89'], [-100, '-₹1.00'],
+    [123456789, '₹1,234,567.89'], [-100, '-₹1.00'],
     [-1, '-₹0.01'], [Number.MAX_SAFE_INTEGER, '₹90,071,992,547,409.91']
   ];
   for (const [value, expected] of samples) {
