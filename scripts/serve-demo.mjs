@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const files = new Map([
   ['/', ['../web/index.html', 'text/html; charset=utf-8']],
   ['/web/app.mjs', ['../web/app.mjs', 'text/javascript; charset=utf-8']],
+  ['/web/scoreboard.mjs', ['../web/scoreboard.mjs', 'text/javascript; charset=utf-8']],
   ['/dist/index.js', ['../dist/index.js', 'text/javascript; charset=utf-8']],
   ['/dist/batch.js', ['../dist/batch.js', 'text/javascript; charset=utf-8']],
   ['/dist/catalog.js', ['../dist/catalog.js', 'text/javascript; charset=utf-8']],
