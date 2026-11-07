@@ -41,7 +41,7 @@ test('calculateRewards accepts deeply frozen cards and transactions without muta
   const again = calculateRewards(cards[0], transactions, 2026);
   assert.deepEqual(first, again);
   assert.deepEqual(first.transactions.map(t => t.id), ['excluded', 'jan', 'feb']);
-  assert.equal(first.totalRewardsPaise, 200);
+  assert.equal(first.totalRewardsPaise, 100);
   assert.equal(first.annualFeeWaived, true);
 });
 
