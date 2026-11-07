@@ -11,6 +11,8 @@ export interface DatedSpendTransaction {
 }
 
 export interface StatementCycleSpendSummary {
+  /** Inclusive cycle starting date, the day after previous close. */
+  cycleStartDate: string;
   /** Inclusive cycle ending date, YYYY-MM-DD; may cross a year boundary. */
   cycleCloseDate: string;
   transactionCount: number;
@@ -28,6 +30,17 @@ function formatDate(year: number, month: number, day: number): string {
   return String(year).padStart(4, '0') + '-' +
     String(month).padStart(2, '0') + '-' +
     String(day).padStart(2, '0');
+}
+
+/** The inclusive start is one calendar day after the previous month's close. */
+function cycleStartDate(closeDate: string, closingDay: number): string {
+  const year = Number(closeDate.slice(0, 4));
+  const month = Number(closeDate.slice(5, 7));
+  const previousYear = month === 1 ? year - 1 : year;
+  const previousMonth = month === 1 ? 12 : month - 1;
+  const previousCloseDay = Math.min(closingDay, daysInMonth(previousYear, previousMonth));
+  const start = new Date(Date.UTC(previousYear, previousMonth - 1, previousCloseDay + 1));
+  return formatDate(start.getUTCFullYear(), start.getUTCMonth() + 1, start.getUTCDate());
 }
 
 /**
@@ -96,6 +109,7 @@ export function summarizeStatementCycleSpend(
       throw new Error('cycle ' + cycleCloseDate + ' totalSpendPaise exceeds safe integer range');
     }
     return {
+      cycleStartDate: cycleStartDate(cycleCloseDate, closingDay),
       cycleCloseDate,
       transactionCount: bucket.count,
       totalSpendPaise: Number(bucket.total),
