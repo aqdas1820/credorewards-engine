@@ -4,7 +4,11 @@ export function formatPaiseAsRupees(value) {
   const amount = BigInt(value);
   const negative = amount < 0n;
   const absolute = negative ? -amount : amount;
-  const major = (absolute / 100n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  // Indian rupee grouping: 12,34,567.89 rather than 1,234,567.89.
+  // Work with bigint strings, never an imprecise floating-point conversion.
+  const digits = (absolute / 100n).toString();
+  const major = digits.length <= 3 ? digits :
+    digits.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + digits.slice(-3);
   return (negative ? '-₹' : '₹') + major + '.' + (absolute % 100n).toString().padStart(2, '0');
 }
 
