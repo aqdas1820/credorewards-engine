@@ -17,6 +17,7 @@ Maintained by CredoNomics Investment Solutions · [credonomics.in](https://credo
 - Annual-fee waivers with separate qualifying-spend exclusions
 - Transaction-by-transaction explanations and a net annual value estimate
 - Independent, deterministic multi-card comparisons with tied rankings and full calculation breakdowns
+- Experimental source-only per-purchase marginal impact report: transaction cashback versus actual annual reward delta after shared caps and fee-waiver changes
 - Experimental dated rule-catalog metadata, provenance and review-gated version resolution (published in v0.2.0-alpha.1)
 - Catalog evolution audit, offline fixture checks and JSON Schema authoring contract (published in v0.2.0-alpha.2)
 - Strict bundled catalog v1 schema validation and multi-scenario monthly batch reports (in the v0.2.0-alpha.3 GitHub prerelease; npm workflow succeeded, registry visibility unverified)
@@ -75,7 +76,7 @@ npm run build
 node bin/credorewards.mjs examples/fictional-card.json
 ```
 
-See [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
+See [PURCHASE-IMPACT.md](docs/PURCHASE-IMPACT.md) for reporting-only purchase deltas, [BATCH-REPORTS.md](docs/BATCH-REPORTS.md) for batch report semantics, [SCHEMA-VALIDATION.md](docs/SCHEMA-VALIDATION.md) for strict catalog validation, and [RULE-SCHEMA.md](docs/RULE-SCHEMA.md) for cap semantics, [CARD-COMPARISON.md](docs/CARD-COMPARISON.md) for comparisons, [RULE-CATALOG.md](docs/RULE-CATALOG.md) for dated revisions, [CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md) for catalog audit/JSON Schema checks and [ROADMAP.md](docs/ROADMAP.md) for planned work.
 
 
 ## v0.2.0-alpha.3 prerelease

@@ -93,7 +93,7 @@ try {
   assert.match(catalogHelp, /Usage: credorewards-catalog/);
 
   const consumer = join(temp, 'consumer.mjs');
-  writeFileSync(consumer, `import { calculateRewards, compareCards, validateRuleCatalog, resolveAnnualCardTerms, compareCatalogCards, auditCatalogUpdate, createBatchReport } from '@credonomics/rewards-engine';
+  writeFileSync(consumer, `import { calculateRewards, compareCards, comparePurchaseImpact, validateRuleCatalog, resolveAnnualCardTerms, compareCatalogCards, auditCatalogUpdate, createBatchReport } from '@credonomics/rewards-engine';
 import { validateCatalogJsonSchema } from '@credonomics/rewards-engine/catalog-schema-validator';
 const card = { id: 'test', name: 'Test', annualFeePaise: 0,
   excludedCategories: [], rules: [{ id: 'base', category: '*', rateBps: 100 }] };
@@ -103,6 +103,8 @@ const other = { ...card, id: 'other', annualFeePaise: 200 };
 const comparison = compareCards([other, card], tx, 2026);
 if (comparison.leaderCardIds.length !== 1 || comparison.leaderCardIds[0] !== 'test') process.exit(2);
 if (comparison.entries[0].rank !== 1 || comparison.entries[0].netAnnualValuePaise !== 100) process.exit(3);
+const impact = comparePurchaseImpact([other, card], [], tx[0], 2026);
+if (impact.entries.length !== 2 || impact.entries.some(e => e.incrementalRewardsPaise !== 100)) process.exit(11);
 const catalog = { schemaVersion: 1, revisions: [
   { revisionId: 'test-2026', issuer: 'Fictional', cardVariant: 'Sample', effectiveFrom: '2026-01-01',
     terms: card, evidence: [], review: { status: 'draft' } },
@@ -128,9 +130,10 @@ if (batch.scenarios[0].monthlyByCard[0].months[0].totalRewardsPaise !== 100) pro
   // NodeNext module resolution from silently breaking despite passing JS tests.
   const typedConsumer = join(temp, 'consumer.mts');
   writeFileSync(typedConsumer, `import {
-  calculateRewards, compareCards, createBatchReport,
+  calculateRewards, compareCards, comparePurchaseImpact, createBatchReport,
   type CardTerms, type Transaction, type CalculationResult,
-  type CardComparisonResult, type BatchScenario, type BatchReport
+  type CardComparisonResult, type BatchScenario, type BatchReport,
+  type PurchaseImpactResult
 } from '@credonomics/rewards-engine';
 import { validateCatalogJsonSchema } from '@credonomics/rewards-engine/catalog-schema-validator';
 const card: CardTerms = {
@@ -141,6 +144,9 @@ const tx: Transaction[] = [
   { id: 'jan', month: '2026-01', category: 'fictional', amountPaise: 10000 }
 ];
 const reward: CalculationResult = calculateRewards(card, tx, 2026);
+const impact: PurchaseImpactResult = comparePurchaseImpact([
+  card, { ...card, id: 'typed-b' }
+], [], tx[0], 2026);
 const comparison: CardComparisonResult = compareCards([
   card, { ...card, id: 'typed-b' }
 ], tx, 2026);
@@ -151,7 +157,7 @@ const scenario: BatchScenario = {
 const report: BatchReport = createBatchReport([scenario]);
 const checked: boolean = validateCatalogJsonSchema({ schemaVersion: 1, revisions: [] }).valid;
 const result: number = reward.totalRewardsPaise +
-  comparison.entries.length + report.scenarioCount + Number(checked);
+  comparison.entries.length + impact.entries.length + report.scenarioCount + Number(checked);
 void result;
 // @ts-expect-error amountPaise must stay a number, not a string
 const badAmount: Transaction = { id: 'bad', month: '2026-01', category: 'x', amountPaise: '100' };
