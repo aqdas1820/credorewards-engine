@@ -58,6 +58,6 @@ test('MCC adapter output feeds comparison and monthly batch reporting without ra
 test('unknown MCC rejects the entire comparison input before financial evaluation', () => {
   const unmapped = [...raw, { id: 'unknown', month: '2026-03', mcc: '9999', amountPaise: 1 }];
   assert.throws(() => mapMccTransactions(unmapped, mappings),
-    /transaction\\[unknown\\] has unmapped MCC: 9999/);
+    /transaction\[unknown\] has unmapped MCC: 9999/);
   assert.deepEqual(raw.map(tx => tx.id), ['feb-utility', 'jan-grocery']);
 });
