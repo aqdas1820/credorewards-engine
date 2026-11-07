@@ -9,7 +9,7 @@ test('rupee display is exact for positive, negative and safe-integer boundaries'
     [123456789, '₹12,34,567.89'], [12345678, '₹1,23,456.78'],
     [99999, '₹999.99'], [100000, '₹1,000.00'], [10000000, '₹1,00,000.00'],
     [-123456789, '-₹12,34,567.89'], [-100, '-₹1.00'],
-    [-1, '-₹0.01'], [Number.MAX_SAFE_INTEGER, '₹90,07,19,92,54,74,09.91']
+    [-1, '-₹0.01'], [Number.MAX_SAFE_INTEGER, '₹9,00,71,99,25,47,409.91']
   ];
   for (const [value, expected] of samples) {
     assert.equal(formatPaiseAsRupees(value), expected);
