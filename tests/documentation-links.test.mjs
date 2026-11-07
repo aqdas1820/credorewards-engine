@@ -9,7 +9,9 @@ const documents = [
   'README.md',
   'CONTRIBUTING.md',
   'CODE_OF_CONDUCT.md',
-  'docs/ARCHITECTURE.md'
+  'docs/ARCHITECTURE.md',
+  'docs/README.md',
+  'docs/BRANDING.md'
 ];
 
 test('repository landing, contributor and architecture documents have valid local links', () => {
