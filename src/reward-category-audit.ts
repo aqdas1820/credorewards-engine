@@ -51,7 +51,7 @@ export function summarizeRewardCategories(result: CalculationResult): RewardCate
   for (const tx of result.transactions) {
     if (!tx || typeof tx !== 'object' || typeof tx.id !== 'string' || !tx.id.trim() ||
         typeof tx.category !== 'string' || !tx.category.trim() ||
-        typeof tx.month !== 'string' || !/^\\d{4}-(0[1-9]|1[0-2])$/.test(tx.month) ||
+        typeof tx.month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(tx.month) ||
         !tx.month.startsWith(result.year + '-')) {
       throw new Error('invalid calculated transaction identity or month');
     }
