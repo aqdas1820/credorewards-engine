@@ -40,7 +40,8 @@
     "demo": "npm run build && node bin/credorewards.mjs examples/fictional-card.json",
     "test:package": "npm run build && node tests/package-smoke.mjs",
     "validate:catalog": "npm run build && node scripts/check-catalog.mjs examples/fictional-catalog.json",
-    "demo:batch": "npm run build && node bin/credorewards-batch.mjs examples/fictional-batch.json"
+    "demo:batch": "npm run build && node bin/credorewards-batch.mjs examples/fictional-batch.json",
+    "verify:release": "npm run typecheck && npm test && npm run test:package && npm run validate:catalog && npm pack --dry-run --ignore-scripts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
