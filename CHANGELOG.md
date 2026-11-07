@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.2.0-alpha.3 (release candidate; not yet published)
+User-visible changes merged after the `v0.2.0-alpha.3` tag are recorded under **Unreleased**. Source changes are not automatically published to npm.
+
+## Unreleased (source on `main`; not a new npm release)
+
+- Add experimental `comparePurchaseImpact()` reporting to compare annual cashback and fee-waiver changes from one hypothetical extra transaction, including shared-cap displacement.
+- Add a local-first browser what-if purchase form with exact rupee-to-paise conversion, collision-free synthetic transaction IDs and before/after impact summaries.
+- Harden static browser builds by shipping all required SDK ESM modules and verifying import closure before deployment.
+- Display INR values with Indian thousands/lakhs/crores grouping without floating-point conversions.
+- Extend deterministic validation and safe-integer financial regression coverage across reward, comparison and batch APIs.
+- Improve developer onboarding, architecture documentation and GitHub contribution/report templates.
+
+## 0.2.0-alpha.3 (GitHub prerelease; npm workflow accepted 2026-11-05; registry visibility unverified)
 
 - Add deterministic `createBatchReport(scenarios)` with independent annual comparisons and 12 calendar-month summaries per card; keep existing annual reward/fee calculations and ranking semantics.
 - Add `credorewards-batch` CLI and fictional multi-scenario JSON example; reject invalid batches instead of quietly producing partial reports.
