@@ -1,3 +1,5 @@
+export { summarizeRewardCategories } from './reward-category-audit.js';
+export type { RewardCategorySummary, RewardCategoryAudit } from './reward-category-audit.js';
 export { createBatchReport } from './batch.js';
 export type { BatchScenario, BatchReport, BatchScenarioReport, BatchCardMonthlyReport, MonthlyCardSummary } from './batch.js';
 export { auditCatalogUpdate } from './catalog-audit.js';
