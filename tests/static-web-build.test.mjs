@@ -10,13 +10,15 @@ test('public demo output only includes reviewed static files and browser SDK', (
   execFileSync(process.execPath, [join(root, 'scripts/build-web-static.mjs')], { cwd: root });
   const output = join(root, 'site-dist');
   assert.deepEqual(readdirSync(output).sort(), ['dist', 'index.html', 'web']);
-  assert.deepEqual(readdirSync(join(output, 'web')).sort(), ['app.mjs', 'local-import.mjs', 'scoreboard.mjs']);
+  assert.deepEqual(readdirSync(join(output, 'web')).sort(), ['app.mjs', 'local-import.mjs', 'purchase-input.mjs', 'scoreboard.mjs']);
   assert.deepEqual(readdirSync(join(output, 'dist')).sort(),
-    ['batch.js', 'catalog-audit.js', 'catalog.js', 'index.js']);
+    ['batch.js', 'catalog-audit.js', 'catalog.js', 'index.js', 'purchase-impact.js']);
   const html = readFileSync(join(output, 'index.html'), 'utf8');
   assert.match(html, /Offline SDK Demo/);
   assert.match(html, /src="\/web\/app\.mjs"/);
   assert.match(readFileSync(join(output, 'web/app.mjs'), 'utf8'), /compareCards/);
+  assert.match(readFileSync(join(output, 'web/app.mjs'), 'utf8'), /comparePurchaseImpact/);
+  assert.match(readFileSync(join(output, 'index.html'), 'utf8'), /id="compare-purchase"/);
   assert.ok(!existsSync(join(output, 'package.json')));
   assert.ok(!existsSync(join(output, 'scripts/serve-demo.mjs')));
   const config = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf8'));
