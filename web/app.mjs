@@ -1,5 +1,6 @@
 import { compareCards } from '/dist/index.js';
 import { createScoreboardRows } from '/web/scoreboard.mjs';
+import { readLocalScenario } from '/web/local-import.mjs';
 
 const example = {
   year: 2026,
@@ -82,6 +83,23 @@ function calculate() {
     output.textContent = 'No results produced.';
   }
 }
+
+document.getElementById('scenario-file').addEventListener('change', async event => {
+  const picker = event.currentTarget;
+  const file = picker.files?.[0];
+  if (!file) return;
+  try {
+    const payload = await readLocalScenario(file);
+    // Preserve existing input if an imported file fails SDK validation.
+    compareCards(payload.cards, payload.transactions, payload.year);
+    input.value = JSON.stringify(payload, null, 2);
+    calculate();
+  } catch (error) {
+    status.textContent = 'Local import rejected: ' + (error instanceof Error ? error.message : String(error));
+  } finally {
+    picker.value = '';
+  }
+});
 
 document.getElementById('calculate').addEventListener('click', calculate);
 document.getElementById('reset').addEventListener('click', () => {
