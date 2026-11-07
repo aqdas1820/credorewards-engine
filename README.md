@@ -1,18 +1,51 @@
-# CredoRewards Engine
+<h1 align="center">
+  <img src="docs/public/credorewards-brand-banner.webp" alt="CredoNomics Investment Solutions presents CredoRewards — Rewards and Loyalty Platform" width="600">
+</h1>
 
-[![TypeScript CI](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Status: Experimental Alpha](https://img.shields.io/badge/status-experimental%20alpha-amber)](docs/PRODUCTION-READINESS.md)
-[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933)](package.json)
+<p align="center">
+  <a href="https://credonomics.in"><img src="docs/public/credonomics-parent-product-badge.webp" alt="A CredoNomics Product" width="276"></a>
+</p>
 
-**Explainable credit-card cashback calculations for India-focused fintech developers.**
+<p align="center">
+  <strong>Transparent, deterministic cashback calculations for fintech developers.</strong><br>
+  Developed and published by <a href="https://credonomics.in">CredoNomics Investment Solutions</a>.
+</p>
 
-CredoRewards is a dependency-free TypeScript runtime library for deterministic, integer-paise cashback calculations, auditable card comparisons and hypothetical purchase-impact analysis. It also includes CLI tooling, catalog validation, synthetic examples and a browser demo.
+<p align="center">
+  <a href="https://github.com/aqdas1820/credorewards-engine/releases/tag/v0.2.0-alpha.3"><img src="https://img.shields.io/badge/release-v0.2.0--alpha.3-6e36dc" alt="GitHub prerelease v0.2.0-alpha.3"></a>
+  <a href="#quick-start"><img src="https://img.shields.io/badge/Node.js-20%2B-067a78" alt="Node.js 20 or newer"></a>
+  <a href="docs/ARCHITECTURE.md"><img src="https://img.shields.io/badge/TypeScript-SDK-345de3" alt="TypeScript SDK"></a>
+  <a href="https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml"><img src="https://github.com/aqdas1820/credorewards-engine/actions/workflows/ci.yml/badge.svg?branch=main" alt="Windows and Linux TypeScript CI"></a>
+  <a href="docs/PRODUCTION-READINESS.md"><img src="https://img.shields.io/badge/status-experimental%20alpha-8b55cd" alt="Experimental alpha status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-067a78" alt="MIT License"></a>
+</p>
 
-**Maintained by [CredoNomics Investment Solutions](https://credonomics.in)** · [Issues](https://github.com/aqdas1820/credorewards-engine/issues) · [Changelog](CHANGELOG.md) · [Roadmap](docs/ROADMAP.md)
+<p align="center">
+  <strong><a href="#quick-start">Get Started</a></strong> ·
+  <a href="#at-a-glance">Features</a> ·
+  <a href="#browser-demo">Demo</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="docs/README.md">Documentation</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a> ·
+  <a href="SECURITY.md">Security</a>
+</p>
+
+CredoRewards is an open-source TypeScript library for integer-paise cashback
+calculations, rule-aware hypothetical card comparisons and auditable purchase-impact
+analysis. It includes CLI tools, versioned catalog metadata and an offline browser demo.
+Its application programming interfaces are intentionally **explainable** and
+**independent of live bank integrations**.
+
+**[Explore the documentation →](docs/README.md)**
 
 > [!IMPORTANT]
-> **Experimental SDK and fictional examples—not a bank integration or financial recommendation service.** No verified issuer rates, MCC inference, bank connectivity or payment credentials are bundled. Actual annual-fee comparisons require **complete-year spending** and independently validated card terms. See [production readiness](docs/PRODUCTION-READINESS.md).
+> **Experimental SDK / fictional demonstration, not a live rewards-and-loyalty service.**
+> The supplied banner describes the product identity; reward points, live issuer
+> integrations, customer accounts and redemption workflows are **not** implemented
+> by this repository. No real issuer rates, banking credentials or personally
+> identifiable financial data are bundled. Annual-fee estimates require
+> **complete-year spending** and independently verified caller-supplied card terms.
+> See [production readiness](docs/PRODUCTION-READINESS.md).
 
 ## At a glance
 
@@ -151,3 +184,17 @@ We welcome [bug reports](https://github.com/aqdas1820/credorewards-engine/issues
 Report vulnerabilities **privately** to [support@credonomics.in](mailto:support@credonomics.in), not through public issues. See [SECURITY.md](SECURITY.md).
 
 Original project code is released under the [MIT License](LICENSE). Bank terms, third-party datasets, logos and trademarks are not granted by that license.
+
+
+## Publisher and support
+
+**[CredoNomics Investment Solutions](https://credonomics.in)** — parent company and publisher.
+
+[Company website](https://credonomics.in) ·
+[Support](mailto:support@credonomics.in) ·
+[CredoNomics Cyber Solutions](https://github.com/aqdas1820/credonomics-cyber-solutions) (sister product)
+
+CredoRewards and CredoNomics brand assets are presented as product identity,
+not as affiliation with or endorsement by any card issuer. See
+[Branding and trademarks](docs/BRANDING.md). Copyright © 2026 CredoNomics
+Investment Solutions.
