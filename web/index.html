@@ -13,7 +13,13 @@ h1{margin:0 0 8px;color:#8ee3d2}p{line-height:1.5;color:#bdcadb}main{display:gri
 textarea{background:#0c1525;color:#e7f4fb;width:100%;min-height:380px;padding:12px;border:1px solid #53647c;border-radius:8px;font:13px/1.5 ui-monospace,monospace;resize:vertical}
 button{background:#69e6c4;color:#07261e;border:0;border-radius:7px;font-weight:700;padding:13px 22px;cursor:pointer}
 button.secondary{background:#30425b;color:#e9f1ff}button:focus-visible,textarea:focus-visible{outline:3px solid #ffda75}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:640px;overflow:auto}
-table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px 7px;border-bottom:1px solid #364661;text-align:left}td:nth-child(n+3),th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}th{color:#a7ead7}tbody tr:first-child{background:#1d3c3c}#scoreboard{overflow-x:auto}#status{min-height:1.5em}small{color:#b7c6d8}@media(max-width:760px){main{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px 7px;border-bottom:1px solid #364661;text-align:left}td:nth-child(n+3),th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}th{color:#a7ead7}tbody tr:first-child{background:#1d3c3c}#scoreboard{overflow-x:auto}#status{min-height:1.5em}small{color:#b7c6d8}.purchase-panel{margin-top:20px}.purchase-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
+.purchase-grid label{display:grid;gap:6px;font-weight:600}
+.purchase-grid input{width:100%;min-width:0;background:#0c1525;color:#e7f4fb;border:1px solid #53647c;border-radius:7px;padding:11px;font:inherit}
+.purchase-grid input:focus-visible{outline:3px solid #ffda75}
+#purchase-scoreboard{overflow-x:auto}#purchase-status{min-height:1.5em}
+@media(max-width:900px){.purchase-grid{grid-template-columns:1fr 1fr}.purchase-grid button{width:100%}}
+@media(max-width:760px){main{grid-template-columns:1fr}.purchase-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -37,6 +43,22 @@ table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:9px 7px;
 <pre id="result" aria-label="Reward comparison results">Select Compare cards to run the local engine.</pre>
 </section>
 </main>
+<section class="panel purchase-panel" aria-labelledby="purchase-heading">
+<h2 id="purchase-heading">What if I make another purchase?</h2>
+<p>Try one synthetic transaction without editing the JSON. This evaluates the same prior history independently on EACH fictional card, not your actual wallet allocation.</p>
+<div class="purchase-grid">
+<label for="purchase-month">Purchase month
+<input type="month" id="purchase-month" value="2026-01" required aria-describedby="purchase-status"></label>
+<label for="purchase-category">Spending category
+<input type="text" id="purchase-category" value="groceries" maxlength="64" required aria-describedby="purchase-status"></label>
+<label for="purchase-rupees">Purchase amount (INR)
+<input type="text" inputmode="decimal" id="purchase-rupees" value="500.00" maxlength="20" required aria-describedby="purchase-status"></label>
+<button id="compare-purchase" type="button">Analyze purchase</button>
+</div>
+<p id="purchase-status" role="status" aria-live="polite"></p>
+<div id="purchase-scoreboard" aria-live="polite" aria-label="Hypothetical purchase impact table"></div>
+<p><small>The new purchase may reduce other transactions' rewards under shared caps. Annual fee changes assume a complete calendar year. No actual issuer terms, merchant offers or bank-linked data are provided.</small></p>
+</section>
 <script type="module" src="/web/app.mjs"></script>
 </body>
 </html>

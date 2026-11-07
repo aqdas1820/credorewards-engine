@@ -20,3 +20,21 @@ export function createScoreboardRows(comparison) {
     isLeader: entry.rank === 1
   }));
 }
+
+
+/**
+ * UI-only rows for the hypothetical purchase-impact report.
+ * Values come directly from the SDK's before/after ledgers.
+ */
+export function createPurchaseImpactRows(impact) {
+  return impact.entries.map(entry => ({
+    rank: entry.rank,
+    cardId: entry.cardId,
+    name: entry.cardName,
+    purchaseRewards: formatPaiseAsRupees(entry.purchase.earnedPaise),
+    existingRewardsDelta: formatPaiseAsRupees(entry.otherTransactionsRewardDeltaPaise),
+    feeSavings: formatPaiseAsRupees(entry.feeSavingsPaise),
+    netDelta: formatPaiseAsRupees(entry.incrementalNetAnnualValuePaise),
+    isLeader: entry.rank === 1
+  }));
+}
