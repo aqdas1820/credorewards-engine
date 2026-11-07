@@ -37,7 +37,7 @@ test('independent seeded annual-fee waiver ledger reconciles excluded spend', ()
     assert.equal(result.annualFeeWaived, waived, 'waiver scenario ' + scenario);
     assert.equal(result.annualFeeChargedPaise, expectedFee, 'fee scenario ' + scenario);
     assert.equal(result.totalRewardsPaise, 0, 'zero-rate scenario ' + scenario);
-    assert.equal(result.netAnnualValuePaise, -expectedFee, 'net scenario ' + scenario);
+    assert.equal(result.netAnnualValuePaise, expectedFee === 0 ? 0 : -expectedFee, 'net scenario ' + scenario);
     assert.deepEqual(result, calculateRewards(card, [...transactions].reverse(), 2026));
     assert.deepEqual(transactions, original, 'mutated input scenario ' + scenario);
   }
