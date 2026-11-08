@@ -20,6 +20,8 @@ const files = [
   'dist/catalog-audit.js'
 ];
 await rm(output, { recursive: true, force: true });
+// Validate the complete allowlist before copying anything. A missing SDK
+// module must not leave a partially built directory that looks deployable.
 for (const file of files) {
   const source = resolve(root, file);
   const relative = file === 'web/index.html' ? 'index.html' : file;
@@ -39,6 +41,11 @@ for (const file of files) {
   if (!stat.isFile() || stat.isSymbolicLink()) {
     throw new Error('Static demo input must be a regular file: ' + file);
   }
+}
+for (const file of files) {
+  const source = resolve(root, file);
+  const relative = file === 'web/index.html' ? 'index.html' : file;
+  const destination = resolve(output, relative);
   await mkdir(dirname(destination), { recursive: true });
   await cp(source, destination);
 }
