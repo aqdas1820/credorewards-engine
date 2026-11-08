@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readdirSync, readFileSync, existsSync, cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync, cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -96,6 +96,38 @@ test('static demo builder fails closed when an allowlisted input is a directory'
       });
     assert.notEqual(result.status, 0, 'Directory input must fail the build');
     assert.match(result.stderr, /Static demo input must be a regular file: web\/app\.mjs/);
+  } finally {
+    rmSync(sandbox, { recursive: true, force: true });
+  }
+});
+
+test('static demo builder rejects symlinked allowlist inputs without copying external data', (t) => {
+  const sandbox = mkdtempSync(join(tmpdir(), 'credorewards-link-'));
+  try {
+    mkdirSync(join(sandbox, 'scripts'), { recursive: true });
+    mkdirSync(join(sandbox, 'web'), { recursive: true });
+    cpSync(join(root, 'scripts/build-web-static.mjs'),
+      join(sandbox, 'scripts/build-web-static.mjs'));
+    const outside = join(sandbox, 'private-source.txt');
+    writeFileSync(outside, 'must never be deployed');
+    try {
+      symlinkSync(outside, join(sandbox, 'web/index.html'), 'file');
+    } catch (error) {
+      if (['EPERM', 'EACCES', 'ENOTSUP'].includes(error.code)) {
+        t.skip('Filesystem does not permit creating symlinks');
+        return;
+      }
+      throw error;
+    }
+    const result = spawnSync(process.execPath,
+      [join(sandbox, 'scripts/build-web-static.mjs')], {
+        cwd: sandbox, encoding: 'utf8'
+      });
+    assert.notEqual(result.status, 0, 'Symlink input must fail the build');
+    assert.ok(result.stderr.includes('Static demo input must be a regular file: web/index.html'),
+      'Builder must identify the rejected symlinked input');
+    assert.ok(!existsSync(join(sandbox, 'site-dist/index.html')),
+      'Rejected input must not be copied into deployment output');
   } finally {
     rmSync(sandbox, { recursive: true, force: true });
   }
