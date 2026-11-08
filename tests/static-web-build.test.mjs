@@ -164,3 +164,39 @@ test('static demo builder rejects a symlinked asset directory before reading fil
     rmSync(sandbox, { recursive: true, force: true });
   }
 });
+
+test('static demo builder rejects a symlinked compiled SDK directory before copying it', (t) => {
+  const sandbox = mkdtempSync(join(tmpdir(), 'credorewards-dist-link-'));
+  try {
+    mkdirSync(join(sandbox, 'scripts'), { recursive: true });
+    mkdirSync(join(sandbox, 'web'), { recursive: true });
+    cpSync(join(root, 'scripts/build-web-static.mjs'),
+      join(sandbox, 'scripts/build-web-static.mjs'));
+    for (const file of ['index.html', 'app.mjs', 'scoreboard.mjs',
+      'local-import.mjs', 'purchase-input.mjs']) {
+      cpSync(join(root, 'web', file), join(sandbox, 'web', file));
+    }
+    const outside = join(sandbox, 'unreviewed-sdk');
+    mkdirSync(outside);
+    writeFileSync(join(outside, 'index.js'), 'must never be deployed');
+    try {
+      symlinkSync(outside, join(sandbox, 'dist'), 'dir');
+    } catch (error) {
+      if (['EPERM', 'EACCES', 'ENOTSUP'].includes(error.code)) {
+        t.skip('Filesystem does not permit creating directory symlinks');
+        return;
+      }
+      throw error;
+    }
+    const result = spawnSync(process.execPath,
+      [join(sandbox, 'scripts/build-web-static.mjs')], {
+        cwd: sandbox, encoding: 'utf8'
+      });
+    assert.notEqual(result.status, 0, 'Symlinked compiled SDK directory must fail the build');
+    assert.ok(result.stderr.includes('Static demo input directory must be a real directory: dist/index.js'));
+    assert.ok(!existsSync(join(sandbox, 'site-dist/dist/index.js')),
+      'Unreviewed SDK must never be copied to deployment output');
+  } finally {
+    rmSync(sandbox, { recursive: true, force: true });
+  }
+});
