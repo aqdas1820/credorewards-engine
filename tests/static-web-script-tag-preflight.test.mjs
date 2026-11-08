@@ -19,7 +19,10 @@ test('static HTML preflight rejects non-executable module mentions without parti
     '<!doctype html><p>/web/app.mjs</p>',
     '<!doctype html><!-- <script type="module" src="/web/app.mjs"></script> -->',
     '<!doctype html><script type="module" src="/web/not-app.mjs"></script>',
-    '<!doctype html><script type="text/plain" src="/web/app.mjs"></script>'
+    '<!doctype html><script type="text/plain" src="/web/app.mjs"></script>',
+    '<!doctype html><template><script type="module" src="/web/app.mjs"></script></template>',
+    '<!doctype html><noscript><script type="module" src="/web/app.mjs"></script></noscript>',
+    '<!doctype html><textarea><script type="module" src="/web/app.mjs"></script></textarea>'
   ]) {
     const sandbox = mkdtempSync(join(tmpdir(), 'credorewards-script-preflight-'));
     try {
