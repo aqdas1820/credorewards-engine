@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync, cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 test('public demo output only includes reviewed static files and browser SDK', () => {
@@ -69,4 +70,31 @@ test('public demo output only includes reviewed static files and browser SDK', (
   assert.doesNotMatch(headers['Content-Security-Policy'], /script-src[^;]*'unsafe-inline'/);
   assert.equal(Object.keys(headers).length, config.headers[0].headers.length,
     'Duplicate deployment security headers can mask weaker values');
+});
+
+test('static demo builder fails closed when an allowlisted input is a directory', () => {
+  const sandbox = mkdtempSync(join(tmpdir(), 'credorewards-static-'));
+  try {
+    const sourceFiles = [
+      'web/index.html', 'web/app.mjs', 'web/scoreboard.mjs',
+      'web/local-import.mjs', 'web/purchase-input.mjs',
+      'dist/index.js', 'dist/purchase-impact.js', 'dist/statement-cycles.js',
+      'dist/batch.js', 'dist/catalog.js', 'dist/catalog-audit.js'
+    ];
+    mkdirSync(join(sandbox, 'scripts'), { recursive: true });
+    cpSync(join(root, 'scripts/build-web-static.mjs'),
+      join(sandbox, 'scripts/build-web-static.mjs'));
+    for (const file of sourceFiles) {
+      const target = join(sandbox, file);
+      mkdirSync(join(target, '..'), { recursive: true });
+      if (file === 'web/app.mjs') mkdirSync(target);
+      else cpSync(join(root, file), target);
+    }
+    assert.throws(() => execFileSync(process.execPath,
+      [join(sandbox, 'scripts/build-web-static.mjs')], {
+        cwd: sandbox, stdio: 'pipe'
+      }), /Static demo input must be a regular file/);
+  } finally {
+    rmSync(sandbox, { recursive: true, force: true });
+  }
 });
