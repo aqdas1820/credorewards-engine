@@ -61,11 +61,12 @@ test('public demo output only includes reviewed static files and browser SDK', (
   assert.equal(config.framework, null);
   assert.equal(headers['Referrer-Policy'], 'no-referrer');
   assert.equal(headers['X-Frame-Options'], 'DENY');
-  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*default-src 'none'(?:;|$)/);
-  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*script-src 'self'(?:;|$)/);
-  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*form-action 'none'(?:;|$)/);
-  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*base-uri 'none'(?:;|$)/);
-  assert.doesNotMatch(headers['Content-Security-Policy'], /'unsafe-eval'|'unsafe-inline'(?=\\s*(?:;|$))/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\s*default-src 'none'(?:;|$)/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\s*script-src 'self'(?:;|$)/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\s*form-action 'none'(?:;|$)/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\s*base-uri 'none'(?:;|$)/);
+  assert.doesNotMatch(headers['Content-Security-Policy'], /'unsafe-eval'/);
+  assert.doesNotMatch(headers['Content-Security-Policy'], /script-src[^;]*'unsafe-inline'/);
   assert.equal(Object.keys(headers).length, config.headers[0].headers.length,
     'Duplicate deployment security headers can mask weaker values');
 });
