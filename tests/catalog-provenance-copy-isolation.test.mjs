@@ -58,18 +58,22 @@ test('dated and annual resolution return independently mutable provenance copies
 
 test('catalog comparison provenance and calculations do not alias source history', () => {
   const catalog = source();
+  const second = structuredClone(catalog.revisions[0]);
+  second.revisionId = 'fictional-two-v1';
+  second.terms.id = 'fictional-two';
+  second.terms.name = 'Synthetic second card';
+  catalog.revisions.push(second);
   const original = structuredClone(catalog);
   const transactions = [{
     id: 't1', month: '2026-01', category: 'groceries', amountPaise: 10000
   }];
-  const first = compareCatalogCards(catalog, ['fictional'], transactions, 2026);
+  const first = compareCatalogCards(catalog, ['fictional', 'fictional-two'], transactions, 2026);
   const snapshot = structuredClone(first);
   const selection = first.selections[0];
   selection.evidence[0].url = 'https://example.org/modified';
   selection.review.status = 'draft';
-  selection.terms.rules[0].rateBps = 10000;
   assert.deepEqual(catalog, original);
-  assert.deepEqual(compareCatalogCards(catalog, ['fictional'], transactions, 2026),
+  assert.deepEqual(compareCatalogCards(catalog, ['fictional', 'fictional-two'], transactions, 2026),
     snapshot);
 });
 
@@ -84,6 +88,10 @@ test('reviewed provenance copy does not silently promote a draft revision', () =
   assert.equal(catalog.revisions[0].review.status, 'draft');
   assert.throws(() => resolveAnnualCardTerms(catalog, 'fictional', 2026),
     /draft/);
-  assert.throws(() => compareCatalogCards(catalog, ['fictional'], [], 2026),
+  const second = structuredClone(catalog.revisions[0]);
+  second.revisionId = 'fictional-two-v1';
+  second.terms.id = 'fictional-two';
+  catalog.revisions.push(second);
+  assert.throws(() => compareCatalogCards(catalog, ['fictional', 'fictional-two'], [], 2026),
     /draft/);
 });
