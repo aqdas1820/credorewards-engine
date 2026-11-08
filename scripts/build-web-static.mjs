@@ -27,6 +27,12 @@ for (const file of files) {
   if (!source.startsWith(root + sep) || !destination.startsWith(output + sep)) {
     throw new Error('Unexpected build path');
   }
+  // A regular file can still be reached through a symlinked parent directory.
+  // Check the reviewed top-level input directory without following symlinks.
+  const parent = await lstat(resolve(root, file.split('/')[0]));
+  if (!parent.isDirectory() || parent.isSymbolicLink()) {
+    throw new Error('Static demo input directory must be a real directory: ' + file);
+  }
   // Refuse symlinked build inputs: copying a link could disclose files outside
   // the reviewed allowlist even when its pathname is inside this repository.
   const stat = await lstat(source);

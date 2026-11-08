@@ -132,3 +132,35 @@ test('static demo builder rejects symlinked allowlist inputs without copying ext
     rmSync(sandbox, { recursive: true, force: true });
   }
 });
+
+test('static demo builder rejects a symlinked asset directory before reading files', (t) => {
+  const sandbox = mkdtempSync(join(tmpdir(), 'credorewards-parent-link-'));
+  try {
+    mkdirSync(join(sandbox, 'scripts'), { recursive: true });
+    const outside = join(sandbox, 'unreviewed-assets');
+    mkdirSync(outside);
+    writeFileSync(join(outside, 'index.html'), 'must never be deployed');
+    cpSync(join(root, 'scripts/build-web-static.mjs'),
+      join(sandbox, 'scripts/build-web-static.mjs'));
+    try {
+      symlinkSync(outside, join(sandbox, 'web'), 'dir');
+    } catch (error) {
+      if (['EPERM', 'EACCES', 'ENOTSUP'].includes(error.code)) {
+        t.skip('Filesystem does not permit creating directory symlinks');
+        return;
+      }
+      throw error;
+    }
+    const result = spawnSync(process.execPath,
+      [join(sandbox, 'scripts/build-web-static.mjs')], {
+        cwd: sandbox, encoding: 'utf8'
+      });
+    assert.notEqual(result.status, 0, 'Symlinked asset directory must fail the build');
+    assert.match(result.stderr,
+      /Static demo input directory must be a real directory: web\/index\.html/);
+    assert.ok(!existsSync(join(sandbox, 'site-dist/index.html')),
+      'External file must never be copied to deployment output');
+  } finally {
+    rmSync(sandbox, { recursive: true, force: true });
+  }
+});
