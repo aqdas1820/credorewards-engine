@@ -55,6 +55,30 @@ test('offline dashboard binds loopback and serves only explicit assets, no uploa
     const sdk = await fetch(address + '/dist/index.js');
     assert.equal(sdk.status, 200);
     assert.match(await sdk.text(), /function compareCards/);
+    // HEAD mirrors GET status and security headers for every explicitly served
+    // SDK/browser asset without returning response bytes or setting cookies.
+    for (const asset of [
+      '/', '/web/app.mjs', '/web/scoreboard.mjs', '/web/local-import.mjs',
+      '/web/purchase-input.mjs', '/dist/index.js', '/dist/purchase-impact.js',
+      '/dist/statement-cycles.js', '/dist/batch.js', '/dist/catalog.js',
+      '/dist/catalog-audit.js'
+    ]) {
+      const response = await fetch(address + asset, { method: 'HEAD' });
+      assert.equal(response.status, 200, asset);
+      assert.equal(await response.text(), '', asset);
+      assert.equal(response.headers.get('cache-control'), 'no-store', asset);
+      assert.equal(response.headers.get('referrer-policy'), 'no-referrer', asset);
+      assert.equal(response.headers.get('x-content-type-options'), 'nosniff', asset);
+      assert.match(response.headers.get('content-security-policy'), /connect-src 'none'/, asset);
+      assert.equal(response.headers.get('set-cookie'), null, asset);
+    }
+    for (const asset of ['/package.json', '/.env', '/not-allowed.json']) {
+      const response = await fetch(address + asset, { method: 'HEAD' });
+      assert.equal(response.status, 404, asset);
+      assert.equal(await response.text(), '', asset);
+      assert.equal(response.headers.get('cache-control'), 'no-store', asset);
+      assert.equal(response.headers.get('set-cookie'), null, asset);
+    }
     const missing = await fetch(address + '/not-allowed.json');
     assert.equal(missing.status, 404);
     const secret = await fetch(address + '/package.json');
