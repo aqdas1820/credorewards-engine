@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Build a static-only, read-only public DEMO. No server/API or user data collection.
-import { cp, mkdir, rm, readFile, readdir } from 'node:fs/promises';
+import { cp, lstat, mkdir, rm, readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, sep } from 'node:path';
 
@@ -27,7 +27,7 @@ for (const file of files) {
   if (!source.startsWith(root + sep) || !destination.startsWith(output + sep)) {
     throw new Error('Unexpected build path');
   }
-  await mkdir(dirname(destination), { recursive: true });
+  // Refuse symlinked build inputs: copying a link could disclose files outside\n  // the reviewed allowlist even when its pathname is inside this repository.\n  const stat = await lstat(source);\n  if (!stat.isFile() || stat.isSymbolicLink()) {\n    throw new Error('Static demo input must be a regular file: ' + file);\n  }\n  await mkdir(dirname(destination), { recursive: true });
   await cp(source, destination);
 }
 const html = await readFile(join(output, 'index.html'), 'utf8');
