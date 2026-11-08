@@ -49,8 +49,9 @@ const html = await readFile(join(root, 'web/index.html'), 'utf8');
 // browser entrypoint. This is a preflight for our reviewed static HTML, not a
 // general-purpose HTML parser.
 const executableHtml = html.replace(/<!--[\s\S]*?-->/g, '')
-  .replace(/<(template|noscript|textarea)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
-if (!/<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/i.test(executableHtml)) {
+  .replace(/<(template|noscript|textarea|style|title)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+const entrypoints = executableHtml.match(/<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/gi) ?? [];
+if (entrypoints.length !== 1) {
   throw new Error('Missing browser entrypoint');
 }
 for (const file of files) {
