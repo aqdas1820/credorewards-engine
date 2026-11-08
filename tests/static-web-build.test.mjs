@@ -193,8 +193,7 @@ test('static demo builder rejects a symlinked compiled SDK directory before copy
         cwd: sandbox, encoding: 'utf8'
       });
     assert.notEqual(result.status, 0, 'Symlinked compiled SDK directory must fail the build');
-    assert.match(result.stderr,
-      /Static demo input directory must be a real directory: dist\\/index\\.js/);
+    assert.ok(result.stderr.includes('Static demo input directory must be a real directory: dist/index.js'));
     assert.ok(!existsSync(join(sandbox, 'site-dist/dist/index.js')),
       'Unreviewed SDK must never be copied to deployment output');
   } finally {
