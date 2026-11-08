@@ -124,7 +124,8 @@ test('static demo builder rejects symlinked allowlist inputs without copying ext
         cwd: sandbox, encoding: 'utf8'
       });
     assert.notEqual(result.status, 0, 'Symlink input must fail the build');
-    assert.match(result.stderr, /Static demo input must be a regular file: web\\/index\\.html/);
+    assert.ok(result.stderr.includes('Static demo input must be a regular file: web/index.html'),
+      'Builder must identify the rejected symlinked input');
     assert.ok(!existsSync(join(sandbox, 'site-dist/index.html')),
       'Rejected input must not be copied into deployment output');
   } finally {
