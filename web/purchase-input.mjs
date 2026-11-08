@@ -1,7 +1,14 @@
 /** Convert a human-entered INR decimal into paise, without floating point. */
 export function parseRupeesToPaise(value) {
   if (typeof value !== 'string') throw new Error('Enter a rupee amount using up to two decimal places.');
-  const match = /^(0|[1-9]\d*)(?:\.(\d{1,2}))?$/.exec(value.trim());
+  const trimmed = value.trim();
+  // The largest safe paise value has at most 14 INR digits and two decimals.
+  // Bound user-controlled text before the regex and BigInt conversion to avoid
+  // parsing extremely long strings in the read-only browser demonstration.
+  if (trimmed.length > 17) {
+    throw new Error('Purchase amount exceeds the maximum safe paise amount.');
+  }
+  const match = /^(0|[1-9]\d*)(?:\.(\d{1,2}))?$/.exec(trimmed);
   if (!match) throw new Error('Enter a positive rupee amount using up to two decimal places (e.g. 1250.50).');
   const paise = BigInt(match[1]) * 100n + BigInt((match[2] ?? '').padEnd(2, '0'));
   if (paise <= 0n) throw new Error('Purchase amount must be greater than zero.');
