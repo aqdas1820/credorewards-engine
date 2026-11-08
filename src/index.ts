@@ -148,7 +148,7 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
     requireString(tx.id, 'transaction.id');
     requireString(tx.category, `transaction[${tx.id}].category`);
     requirePaise(tx.amountPaise, `transaction[${tx.id}].amountPaise`);
-    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(tx.month) || !tx.month.startsWith(`${year}-`)) {
+    if (typeof tx.month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(tx.month) || !tx.month.startsWith(`${year}-`)) {
       throw new Error(`transaction[${tx.id}].month must be YYYY-MM in ${year}`);
     }
     if (seen.has(tx.id)) throw new Error(`duplicate transaction id: ${tx.id}`);
