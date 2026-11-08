@@ -50,7 +50,13 @@ const html = await readFile(join(root, 'web/index.html'), 'utf8');
 // general-purpose HTML parser.
 const executableHtml = html.replace(/<!--[\s\S]*?-->/g, '')
   .replace(/<(template|noscript|textarea|style|title)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
-const entrypoints = executableHtml.match(/<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/gi) ?? [];
+// HTML-looking script text inside another script is not executable markup.
+const entrypointPattern = /<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/i;
+const executableScripts = executableHtml.replace(
+  /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,
+  tag => entrypointPattern.test(tag) && (tag.match(/<script\b/gi)?.length ?? 0) === 1 ? tag : ''
+);
+const entrypoints = executableScripts.match(new RegExp(entrypointPattern.source, 'gi')) ?? [];
 if (entrypoints.length !== 1) {
   throw new Error('Missing browser entrypoint');
 }
