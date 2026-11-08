@@ -28,8 +28,8 @@ test('static demo build fails closed when the compiled SDK entrypoint is missing
       });
     assert.notEqual(result.status, 0, 'Missing compiled SDK must fail the build');
     assert.match(result.stderr, /ENOENT/);
-    assert.ok(!existsSync(join(sandbox, 'site-dist/dist/index.js')),
-      'Missing SDK entrypoint must not be present in deployment output');
+    assert.ok(!existsSync(join(sandbox, 'site-dist')),
+      'Failed input preflight must not leave partial deployable assets');
   } finally {
     rmSync(sandbox, { recursive: true, force: true });
   }
