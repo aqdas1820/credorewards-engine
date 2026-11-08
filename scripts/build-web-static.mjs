@@ -45,7 +45,11 @@ for (const file of files) {
 // Check the reviewed HTML entrypoint before emitting any deployment assets.
 // Invalid HTML must not leave a partial site-dist directory behind.
 const html = await readFile(join(root, 'web/index.html'), 'utf8');
-if (!html.includes('/web/app.mjs')) throw new Error('Missing browser entrypoint');
+// A comment or prose mention of the module is not a browser entrypoint.
+const uncommentedHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+if (!/<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/i.test(uncommentedHtml)) {
+  throw new Error('Missing browser entrypoint');
+}
 for (const file of files) {
   const source = resolve(root, file);
   const relative = file === 'web/index.html' ? 'index.html' : file;
