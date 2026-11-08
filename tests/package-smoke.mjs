@@ -42,6 +42,15 @@ try {
   ], temp);
 
   const installedDir = join(temp, 'node_modules', '@credonomics', 'rewards-engine');
+  // Release privacy boundary: repository-only fixtures and local configuration
+  // must never be bundled into the installable SDK tarball.
+  for (const forbidden of [
+    '.env', '.env.local', '.npmrc', '.git', '.github',
+    'tests', 'examples', 'scripts', 'coverage', 'node_modules'
+  ]) {
+    assert.equal(existsSync(join(installedDir, forbidden)), false,
+      'Unexpected repository-only content in npm package: ' + forbidden);
+  }
   const metadata = JSON.parse(readFileSync(join(installedDir, 'package.json'), 'utf8'));
   const sourceManifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   assert.equal(metadata.name, sourceManifest.name, 'Installed package name differs from source');
