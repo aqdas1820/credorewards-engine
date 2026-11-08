@@ -42,6 +42,10 @@ for (const file of files) {
     throw new Error('Static demo input must be a regular file: ' + file);
   }
 }
+// Check the reviewed HTML entrypoint before emitting any deployment assets.
+// Invalid HTML must not leave a partial site-dist directory behind.
+const html = await readFile(join(root, 'web/index.html'), 'utf8');
+if (!html.includes('/web/app.mjs')) throw new Error('Missing browser entrypoint');
 for (const file of files) {
   const source = resolve(root, file);
   const relative = file === 'web/index.html' ? 'index.html' : file;
@@ -49,8 +53,6 @@ for (const file of files) {
   await mkdir(dirname(destination), { recursive: true });
   await cp(source, destination);
 }
-const html = await readFile(join(output, 'index.html'), 'utf8');
-if (!html.includes('/web/app.mjs')) throw new Error('Missing browser entrypoint');
 const top = (await readdir(output)).sort();
 if (JSON.stringify(top) !== JSON.stringify(['dist', 'index.html', 'web'])) {
   throw new Error('Unexpected static output contents');
