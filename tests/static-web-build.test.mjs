@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, existsSync, cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
@@ -90,10 +90,12 @@ test('static demo builder fails closed when an allowlisted input is a directory'
       if (file === 'web/app.mjs') mkdirSync(target);
       else cpSync(join(root, file), target);
     }
-    assert.throws(() => execFileSync(process.execPath,
+    const result = spawnSync(process.execPath,
       [join(sandbox, 'scripts/build-web-static.mjs')], {
-        cwd: sandbox, stdio: 'pipe'
-      }), /Static demo input must be a regular file/);
+        cwd: sandbox, encoding: 'utf8'
+      });
+    assert.notEqual(result.status, 0, 'Directory input must fail the build');
+    assert.match(result.stderr, /Static demo input must be a regular file: web\/app\.mjs/);
   } finally {
     rmSync(sandbox, { recursive: true, force: true });
   }
