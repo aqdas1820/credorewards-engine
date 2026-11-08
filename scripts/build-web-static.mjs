@@ -45,9 +45,12 @@ for (const file of files) {
 // Check the reviewed HTML entrypoint before emitting any deployment assets.
 // Invalid HTML must not leave a partial site-dist directory behind.
 const html = await readFile(join(root, 'web/index.html'), 'utf8');
-// A comment or prose mention of the module is not a browser entrypoint.
-const uncommentedHtml = html.replace(/<!--[\s\S]*?-->/g, '');
-if (!/<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/i.test(uncommentedHtml)) {
+// Comments and inert HTML containers must not masquerade as an executable
+// browser entrypoint. This is a preflight for our reviewed static HTML, not a
+// general-purpose HTML parser.
+const executableHtml = html.replace(/<!--[\s\S]*?-->/g, '')
+  .replace(/<(template|noscript|textarea)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+if (!/<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']\s*><\/script\s*>/i.test(executableHtml)) {
   throw new Error('Missing browser entrypoint');
 }
 for (const file of files) {
