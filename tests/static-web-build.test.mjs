@@ -54,4 +54,18 @@ test('public demo output only includes reviewed static files and browser SDK', (
   assert.match(headers['Content-Security-Policy'], /frame-ancestors 'none'/);
   assert.equal(headers['X-Content-Type-Options'], 'nosniff');
   assert.equal(headers['Cache-Control'], 'no-store');
+  // Deployment configuration must protect every static route, not only the
+  // index page. These checks do not assert that a live deployment is public.
+  assert.equal(config.headers.length, 1);
+  assert.equal(config.headers[0].source, '/(.*)');
+  assert.equal(config.framework, null);
+  assert.equal(headers['Referrer-Policy'], 'no-referrer');
+  assert.equal(headers['X-Frame-Options'], 'DENY');
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*default-src 'none'(?:;|$)/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*script-src 'self'(?:;|$)/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*form-action 'none'(?:;|$)/);
+  assert.match(headers['Content-Security-Policy'], /(?:^|;)\\s*base-uri 'none'(?:;|$)/);
+  assert.doesNotMatch(headers['Content-Security-Policy'], /'unsafe-eval'|'unsafe-inline'(?=\\s*(?:;|$))/);
+  assert.equal(Object.keys(headers).length, config.headers[0].headers.length,
+    'Duplicate deployment security headers can mask weaker values');
 });
