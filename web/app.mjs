@@ -1,7 +1,7 @@
 import { compareCards, comparePurchaseImpact } from '/dist/index.js';
 import { createScoreboardRows, createPurchaseImpactRows } from '/web/scoreboard.mjs';
 import { parseRupeesToPaise, nextSyntheticPurchaseId } from '/web/purchase-input.mjs';
-import { readLocalScenario } from '/web/local-import.mjs';
+import { parseScenarioText, readLocalScenario } from '/web/local-import.mjs';
 
 const example = {
   year: 2026,
@@ -91,7 +91,7 @@ function calculate() {
   purchaseScoreboard.replaceChildren();
   purchaseStatus.textContent = '';
   try {
-    const payload = JSON.parse(input.value);
+    const payload = parseScenarioText(input.value);
     // The SDK itself performs strict card, transaction, year and paise validation.
     const result = compareCards(payload.cards, payload.transactions, payload.year);
     if (purchaseMonth.value.slice(0, 4) !== String(payload.year)) {
@@ -123,7 +123,7 @@ function calculate() {
 function calculatePurchaseImpact() {
   purchaseScoreboard.replaceChildren();
   try {
-    const scenario = JSON.parse(input.value);
+    const scenario = parseScenarioText(input.value);
     const purchase = {
       id: nextSyntheticPurchaseId(scenario.transactions),
       month: purchaseMonth.value,
