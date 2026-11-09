@@ -40,7 +40,7 @@ test('static demo artifact contains exactly reviewed public assets', () => {
     assert.equal(existsSync(output), true);
     assert.deepEqual(collect(output).sort(), expected);
     const html = readFileSync(join(output, 'index.html'), 'utf8');
-    assert.match(html, /<script\\s+type=["']module["']\\s+src=["']\\/web\\/app\\.mjs["']/i);
+    assert.match(html, /<script\s+type=["']module["']\s+src=["']\/web\/app\.mjs["']/i);
     for (const file of expected) {
       assert.deepEqual(readFileSync(join(output, file)),
         readFileSync(join(root, file === 'index.html' ? 'web/index.html' : file)),
