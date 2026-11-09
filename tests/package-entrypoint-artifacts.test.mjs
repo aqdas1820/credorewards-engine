@@ -4,7 +4,9 @@ import { resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
+// fileURLToPath(directory URL) retains a trailing separator on both platforms.
+// Normalize it before checking descendant paths to avoid false traversal alerts.
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 test('every declared package entrypoint exists after build', () => {
