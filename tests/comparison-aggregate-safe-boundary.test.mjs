@@ -21,5 +21,6 @@ test('comparison accepts annual cashback exactly at the safe-integer boundary', 
   const forward = compareCards(cards, history, 2026);
   const reversed = compareCards(Object.freeze([...cards].reverse()), history, 2026);
   assert.deepEqual(forward, reversed);
-  assert.equal(forward.rankings[0].totalRewardsPaise, max);
+  assert.deepEqual(forward.entries.map(entry => entry.netAnnualValuePaise), [max, 0]);
+  assert.deepEqual(forward.entries.map(entry => entry.differenceFromLeaderPaise), [0, max]);
 });
