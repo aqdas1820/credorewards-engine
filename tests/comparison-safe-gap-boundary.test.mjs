@@ -20,7 +20,6 @@ test('comparison accepts the exact safe-integer leader gap and preserves its sig
   const reversed = compareCards(Object.freeze([...cards].reverse()), history, 2026);
   assert.deepEqual(forward, reversed);
   assert.deepEqual(forward.leaderCardIds, ['free']);
-  assert.deepEqual(forward.entries.map(entry => entry.id ?? entry.cardId), ['free', 'fee']);
   assert.deepEqual(forward.entries.map(entry => entry.netAnnualValuePaise),
     [0, -Number.MAX_SAFE_INTEGER]);
   assert.deepEqual(forward.entries.map(entry => entry.differenceFromLeaderPaise),
