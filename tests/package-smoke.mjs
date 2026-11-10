@@ -171,6 +171,18 @@ void result;
 // @ts-expect-error amountPaise must stay a number, not a string
 const badAmount: Transaction = { id: 'bad', month: '2026-01', category: 'x', amountPaise: '100' };
 void badAmount;
+// @ts-expect-error rateBps must remain numeric in published declarations
+const badRate: CardTerms = { ...card, rules: [{ id: 'bad-rate', category: '*', rateBps: '500' }] };
+void badRate;
+// @ts-expect-error required annual fee cannot be omitted from public CardTerms
+const missingFee: CardTerms = { id: 'missing-fee', name: 'Synthetic', rules: [] };
+void missingFee;
+// @ts-expect-error month must remain a string, not a numeric timestamp
+const badMonth: Transaction = { id: 'bad-month', month: 202601, category: 'x', amountPaise: 100 };
+void badMonth;
+// @ts-expect-error a comparison result must not accept arbitrary leader IDs as a scalar
+const badLeaders: CardComparisonResult = { ...comparison, leaderCardIds: 'typed' };
+void badLeaders;
 `);
   const tscCli = join(root, 'node_modules', 'typescript', 'bin', 'tsc');
   assert.ok(existsSync(tscCli), 'Expected installed TypeScript compiler for consumer smoke test');
