@@ -128,6 +128,19 @@ const report = auditCatalogUpdate(catalog, catalog);
 if (report.unchangedRevisionIds.length !== 2) process.exit(6);
 if (!validateCatalogJsonSchema(catalog).valid) process.exit(7);
 if (validateCatalogJsonSchema({ ...catalog, typo: true }).valid) process.exit(8);
+const reviewed = structuredClone(catalog);
+reviewed.revisions[0].review = { status: 'reviewed' };
+const missingReview = validateCatalogJsonSchema(reviewed);
+if (missingReview.valid || !missingReview.errors.some(e =>
+  e.instancePath === '/revisions/0/review/reviewer' && e.keyword === 'required')) process.exit(12);
+reviewed.revisions[0].review = {
+  status: 'reviewed', reviewer: 'Synthetic Reviewer', reviewedOn: '2026-01-01'
+};
+const missingEvidence = validateCatalogJsonSchema(reviewed);
+if (missingEvidence.valid || !missingEvidence.errors.some(e =>
+  e.instancePath === '/revisions/0/evidence' && e.keyword === 'minItems')) process.exit(13);
+reviewed.revisions[0].review = { status: 'draft' };
+if (!validateCatalogJsonSchema(reviewed).valid) process.exit(14);
 const batch = createBatchReport([{ id: 'synthetic-case', year: 2026,
   cards: [card, other], transactions: tx }]);
 if (batch.scenarios[0].comparison.leaderCardIds[0] !== 'test') process.exit(9);
