@@ -163,9 +163,9 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   // Exclusion arrays were validated above; copy indexed values without invoking
   // a caller-provided iterator (which Set(array) would execute).
   const excluded = new Set<string>();
-  for (let i = 0; i < (card.excludedCategories?.length ?? 0); i++) excluded.add(card.excludedCategories![i]);
+  for (let i = 0; i < (card.excludedCategories?.length ?? 0); i++) excluded.add(card.excludedCategories![i]!);
   const feeExcluded = new Set<string>();
-  for (let i = 0; i < (card.feeWaiverExcludedCategories?.length ?? 0); i++) feeExcluded.add(card.feeWaiverExcludedCategories![i]);
+  for (let i = 0; i < (card.feeWaiverExcludedCategories?.length ?? 0); i++) feeExcluded.add(card.feeWaiverExcludedCategories![i]!);
   const monthlyUsage = new Map<string, bigint>();
   const annualUsage = new Map<string, bigint>();
   const results: TransactionResult[] = [];
