@@ -107,8 +107,14 @@ function safeNumber(n: bigint, field: string): number {
 }
 function validateCategories(categories: unknown, field: string): void {
   if (categories === undefined) return;
-  if (!Array.isArray(categories) || !Array.from(categories).every(c => typeof c === 'string' && c.trim().length > 0)) {
-    throw new Error(`${field} must be a string array`);
+  if (!Array.isArray(categories)) throw new Error(`${field} must be a string array`);
+  for (let index = 0; index < categories.length; index++) {
+    // Check own slots directly: holes/inherited values are not valid entries.
+    // Avoid copying an untrusted array or invoking a custom iterator.
+    if (!Object.prototype.hasOwnProperty.call(categories, index) ||
+        typeof categories[index] !== 'string' || !categories[index].trim()) {
+      throw new Error(`${field} must be a string array`);
+    }
   }
 }
 function validateTerms(card: CardTerms): void {
@@ -154,8 +160,12 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
     if (seen.has(tx.id)) throw new Error(`duplicate transaction id: ${tx.id}`);
     seen.add(tx.id);
   }
-  const excluded = new Set(card.excludedCategories ?? []);
-  const feeExcluded = new Set(card.feeWaiverExcludedCategories ?? []);
+  // Exclusion arrays were validated above; copy indexed values without invoking
+  // a caller-provided iterator (which Set(array) would execute).
+  const excluded = new Set<string>();
+  for (let i = 0; i < (card.excludedCategories?.length ?? 0); i++) excluded.add(card.excludedCategories![i]!);
+  const feeExcluded = new Set<string>();
+  for (let i = 0; i < (card.feeWaiverExcludedCategories?.length ?? 0); i++) feeExcluded.add(card.feeWaiverExcludedCategories![i]!);
   const monthlyUsage = new Map<string, bigint>();
   const annualUsage = new Map<string, bigint>();
   const results: TransactionResult[] = [];

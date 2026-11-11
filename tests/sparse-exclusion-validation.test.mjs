@@ -37,3 +37,25 @@ test('dense valid exclusion arrays retain their existing behavior', () => {
   assert.equal(result.feeWaiverEligibleSpendPaise, 10000);
   assert.equal(result.transactions[0].reason, 'excluded_category');
 });
+
+test('validate exclusions without invoking a caller-supplied array iterator', () => {
+  const terms = card();
+  const exclusions = ['utilities'];
+  Object.defineProperty(exclusions, Symbol.iterator, {
+    value() { throw new Error('untrusted iterator invoked'); }
+  });
+  terms.excludedCategories = exclusions;
+  const result = calculateRewards(terms, transactions, 2026);
+  assert.equal(result.totalRewardsPaise, 100);
+});
+
+test('reject inherited exclusion entries that mask sparse array holes', () => {
+  const terms = card();
+  const exclusions = new Array(1);
+  const prototype = Object.create(Array.prototype);
+  prototype[0] = 'groceries';
+  Object.setPrototypeOf(exclusions, prototype);
+  terms.feeWaiverExcludedCategories = exclusions;
+  assert.throws(() => calculateRewards(terms, transactions, 2026), /feeWaiverExcludedCategories must be a string array/);
+  assert.equal(Object.hasOwn(exclusions, 0), false);
+});
