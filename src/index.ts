@@ -127,7 +127,10 @@ function validateTerms(card: CardTerms): void {
   validateCategories(card.feeWaiverExcludedCategories, 'card.feeWaiverExcludedCategories');
   if (!Array.isArray(card.rules)) throw new Error('card.rules must be an array');
   const ruleIds = new Set<string>();
-  for (const rule of card.rules) {
+  for (let index = 0; index < card.rules.length; index++) {
+    // Validate actual own slots; for..of can be overridden to hide malformed rules.
+    if (!Object.prototype.hasOwnProperty.call(card.rules, index)) throw new Error('invalid rule');
+    const rule = card.rules[index];
     if (!rule || typeof rule !== 'object') throw new Error('invalid rule');
     requireString(rule.id, 'rule.id');
     requireString(rule.category, `rule[${rule.id}].category`);
