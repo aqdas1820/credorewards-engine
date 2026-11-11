@@ -134,7 +134,7 @@ const missingReview = validateCatalogJsonSchema(reviewed);
 if (missingReview.valid || !missingReview.errors.some(e =>
   e.instancePath === '/revisions/0/review/reviewer' && e.keyword === 'required')) process.exit(12);
 reviewed.revisions[0].review = {
-  status: 'reviewed', reviewer: 'Synthetic Reviewer', reviewedAt: '2026-01-01'
+  status: 'reviewed', reviewer: 'Synthetic Reviewer', reviewedOn: '2026-01-01'
 };
 const missingEvidence = validateCatalogJsonSchema(reviewed);
 if (missingEvidence.valid || !missingEvidence.errors.some(e =>
