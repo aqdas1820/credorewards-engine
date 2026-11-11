@@ -107,7 +107,7 @@ function safeNumber(n: bigint, field: string): number {
 }
 function validateCategories(categories: unknown, field: string): void {
   if (categories === undefined) return;
-  if (!Array.isArray(categories) || !categories.every(c => typeof c === 'string' && c.trim().length > 0)) {
+  if (!Array.isArray(categories) || !Array.from(categories).every(c => typeof c === 'string' && c.trim().length > 0)) {
     throw new Error(`${field} must be a string array`);
   }
 }
