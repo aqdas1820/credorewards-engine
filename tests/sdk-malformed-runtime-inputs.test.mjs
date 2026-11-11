@@ -59,3 +59,29 @@ test('runtime rejects malformed exclusion arrays, rule IDs and transaction month
   assert.equal(baseCard.rules[0].rateBps, 500);
   assert.equal(baseTx.amountPaise, 100);
 });
+
+test('aggregate paise overflow fails closed even when each input amount is safe', () => {
+  const large = Number.MAX_SAFE_INTEGER;
+  const transactions = [
+    { ...baseTx, id: 'large-a', amountPaise: large },
+    { ...baseTx, id: 'large-b', amountPaise: large }
+  ];
+  assert.throws(
+    () => calculateRewards(baseCard, transactions, 2026),
+    /totalSpendPaise exceeds safe integer range/
+  );
+  assert.equal(transactions[0].amountPaise, large);
+  assert.equal(transactions[1].amountPaise, large);
+});
+
+test('duplicate transaction IDs fail closed before cap allocation', () => {
+  const cappedCard = {
+    ...baseCard,
+    rules: [{ ...baseCard.rules[0], monthlyCapPaise: 1 }]
+  };
+  assert.throws(
+    () => calculateRewards(cappedCard, [baseTx, { ...baseTx, amountPaise: 200 }], 2026),
+    /duplicate transaction id: one/
+  );
+  assert.equal(calculateRewards(cappedCard, [baseTx], 2026).totalRewardsPaise, 1);
+});
