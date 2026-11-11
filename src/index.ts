@@ -160,8 +160,12 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
     if (seen.has(tx.id)) throw new Error(`duplicate transaction id: ${tx.id}`);
     seen.add(tx.id);
   }
-  const excluded = new Set(card.excludedCategories ?? []);
-  const feeExcluded = new Set(card.feeWaiverExcludedCategories ?? []);
+  // Exclusion arrays were validated above; copy indexed values without invoking
+  // a caller-provided iterator (which Set(array) would execute).
+  const excluded = new Set<string>();
+  for (let i = 0; i < (card.excludedCategories?.length ?? 0); i++) excluded.add(card.excludedCategories![i]);
+  const feeExcluded = new Set<string>();
+  for (let i = 0; i < (card.feeWaiverExcludedCategories?.length ?? 0); i++) feeExcluded.add(card.feeWaiverExcludedCategories![i]);
   const monthlyUsage = new Map<string, bigint>();
   const annualUsage = new Map<string, bigint>();
   const results: TransactionResult[] = [];
