@@ -178,7 +178,7 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   let totalRewards = 0n;
 
   // Avoid caller ordering affecting monthly caps. Order by month, then transaction ID.
-  const ordered = [...transactions].sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
+  const ordered = transactions.slice().sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
   for (const tx of ordered) {
     const amount = BigInt(tx.amountPaise);
     totalSpend += amount;
