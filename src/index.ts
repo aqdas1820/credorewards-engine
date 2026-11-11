@@ -149,7 +149,10 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   if (!Number.isInteger(year) || year < 2000 || year > 2100) throw new Error('year must be an integer 2000–2100');
   if (!Array.isArray(transactions)) throw new Error('transactions must be an array');
   const seen = new Set<string>();
-  for (const tx of transactions) {
+  for (let index = 0; index < transactions.length; index++) {
+    // Inspect own indexed entries; caller-defined iterators can conceal invalid transactions.
+    if (!Object.prototype.hasOwnProperty.call(transactions, index)) throw new Error('invalid transaction');
+    const tx = transactions[index]!;
     if (!tx || typeof tx !== 'object') throw new Error('invalid transaction');
     requireString(tx.id, 'transaction.id');
     requireString(tx.category, `transaction[${tx.id}].category`);
@@ -175,7 +178,7 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   let totalRewards = 0n;
 
   // Avoid caller ordering affecting monthly caps. Order by month, then transaction ID.
-  const ordered = [...transactions].sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
+  const ordered = transactions.slice().sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
   for (const tx of ordered) {
     const amount = BigInt(tx.amountPaise);
     totalSpend += amount;
