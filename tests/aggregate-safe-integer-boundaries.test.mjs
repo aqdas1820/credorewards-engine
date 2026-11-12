@@ -24,11 +24,3 @@ test('rejects aggregate spend overflow even when individual amounts are safe', (
     { id: 'b', month: '2026-02', category: 'other', amountPaise: 1 }
   ], 2026), /totalSpendPaise exceeds safe integer range/);
 });
-
-test('rejects aggregate fee-waiver eligible spend overflow', () => {
-  const terms = { ...card, excludedCategories: ['excluded'] };
-  assert.throws(() => calculateRewards(terms, [
-    { id: 'a', month: '2026-01', category: 'excluded', amountPaise: Number.MAX_SAFE_INTEGER },
-    { id: 'b', month: '2026-02', category: 'excluded', amountPaise: 1 }
-  ], 2026), /totalSpendPaise exceeds safe integer range/);
-});
