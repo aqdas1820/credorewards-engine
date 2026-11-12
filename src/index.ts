@@ -286,7 +286,10 @@ export function compareCards(
   const cardIds = new Set<string>();
   const scored: { card: CardTerms; calculation: CalculationResult }[] = [];
 
-  for (const card of cards) {
+  for (let index = 0; index < cards.length; index++) {
+    // Reject sparse/inherited slots and do not trust caller-defined array iterators.
+    if (!Object.prototype.hasOwnProperty.call(cards, index)) throw new Error('invalid card');
+    const card = cards[index]!;
     const calculation = calculateRewards(card, transactions, year);
     if (cardIds.has(calculation.cardId)) {
       throw new Error('duplicate card id: ' + calculation.cardId);
