@@ -4,8 +4,17 @@ import { readFileSync } from 'node:fs';
 
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
-test('published package manifest has no install-time lifecycle execution', () => {
-  for (const hook of ['preinstall', 'install', 'postinstall', 'prepare', 'prepack', 'postpack', 'prepublish', 'prepublishOnly']) {
+test('published package manifest has no automatic install, pack, publish or version lifecycle execution', () => {
+  // npm invokes these hooks implicitly during installation, packing, publication or versioning.
+  // Keep release steps explicit and reviewable rather than allowing hidden side effects.
+  const forbiddenHooks = [
+    'preinstall', 'install', 'postinstall',
+    'preprepare', 'prepare', 'postprepare',
+    'prepack', 'postpack',
+    'prepublish', 'prepublishOnly', 'publish', 'postpublish',
+    'preversion', 'version', 'postversion'
+  ];
+  for (const hook of forbiddenHooks) {
     assert.equal(Object.hasOwn(manifest.scripts ?? {}, hook), false,
       `Unexpected package lifecycle hook: ${hook}`);
   }
