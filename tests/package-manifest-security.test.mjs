@@ -22,20 +22,33 @@ test('published package manifest has no automatic install, pack, publish or vers
 });
 
 test('published entrypoints cannot escape package root or use absolute paths', () => {
+  // npm exports may nest conditions or use arrays of fallback targets. Check every leaf.
+  const exportTargets = [];
+  function collectTargets(value) {
+    if (typeof value === 'string') {
+      exportTargets.push(value);
+    } else if (Array.isArray(value)) {
+      for (const entry of value) collectTargets(entry);
+    } else if (value !== null && typeof value === 'object') {
+      for (const entry of Object.values(value)) collectTargets(entry);
+    } else {
+      assert.fail('Unexpected non-path package export target');
+    }
+  }
+  collectTargets(manifest.exports);
   const targets = [
     manifest.main,
     manifest.types,
     ...Object.values(manifest.bin ?? {}),
-    ...Object.values(manifest.exports ?? {}).flatMap(value =>
-      typeof value === 'string' ? [value] : Object.values(value))
+    ...exportTargets
   ];
   assert.ok(targets.length >= 5, 'Expected published SDK and CLI targets');
   for (const target of targets) {
     assert.equal(typeof target, 'string');
-    assert.match(target, /^(?:\.\/)?[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_.-]+)*$/,
+    assert.match(target, /^(?:\\.\\/)?[a-zA-Z0-9_-]+(?:\\/[a-zA-Z0-9_.-]+)*$/,
       `Unsafe package entrypoint: ${target}`);
     assert.equal(target.split('/').includes('..'), false);
-    assert.equal(target.includes('\\'), false);
+    assert.equal(target.includes('\\\\'), false);
   }
 });
 
