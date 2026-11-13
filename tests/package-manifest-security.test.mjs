@@ -45,10 +45,10 @@ test('published entrypoints cannot escape package root or use absolute paths', (
   assert.ok(targets.length >= 5, 'Expected published SDK and CLI targets');
   for (const target of targets) {
     assert.equal(typeof target, 'string');
-    assert.match(target, /^(?:\\.\\/)?[a-zA-Z0-9_-]+(?:\\/[a-zA-Z0-9_.-]+)*$/,
+    assert.match(target, /^(?:\.\/)?[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_.-]+)*$/,
       `Unsafe package entrypoint: ${target}`);
     assert.equal(target.split('/').includes('..'), false);
-    assert.equal(target.includes('\\\\'), false);
+    assert.equal(target.includes('\\'), false);
   }
 });
 
