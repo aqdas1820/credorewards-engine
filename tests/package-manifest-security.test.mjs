@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { lstatSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
@@ -63,4 +64,29 @@ test('npm cannot implicitly expose an entire directory as CLI commands', () => {
   // Keep command exposure limited to the individually reviewed manifest.bin entries.
   assert.equal(Object.hasOwn(manifest.directories ?? {}, 'bin'), false,
     'Unexpected implicit npm CLI command directory');
+});
+
+test('published SDK export targets resolve to regular package-local files', () => {
+  // npm test builds dist first. Validate actual targets, not just manifest path strings.
+  const packageRoot = fileURLToPath(new URL('../', import.meta.url));
+  const targets = [];
+  function collect(value) {
+    if (typeof value === 'string') targets.push(value);
+    else if (Array.isArray(value)) value.forEach(collect);
+    else if (value !== null && typeof value === 'object') Object.values(value).forEach(collect);
+    else assert.fail('Unexpected package export target type');
+  }
+  collect(manifest.exports);
+  targets.push(manifest.main, manifest.types);
+  assert.ok(targets.length >= 4, 'Expected SDK export targets');
+  for (const target of targets) {
+    assert.match(target, /^(?:\.\/)?[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_.-]+)*$/,
+      `Unsafe export target: ${target}`);
+    const filePath = fileURLToPath(new URL(target.startsWith('./') ? target : `./${target}`,
+      new URL('../', import.meta.url)));
+    assert.ok(filePath.startsWith(packageRoot), `Export target escaped package: ${target}`);
+    const stat = lstatSync(filePath);
+    assert.equal(stat.isSymbolicLink(), false, `Symlink export target: ${target}`);
+    assert.equal(stat.isFile(), true, `Non-file export target: ${target}`);
+  }
 });
