@@ -92,6 +92,15 @@ try {
     assert.match(helpFromShim, new RegExp('Usage: ' + command));
   }
 
+  // Verify the installed package's exports boundary from a real consumer.
+  // Internal build files must not be deep-importable by package specifier.
+  const privateImport = spawnSync(process.execPath, ['--input-type=module', '-e',
+    "import('@credonomics/rewards-engine/dist/index.js').then(() => process.exit(2), error => { if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') { console.error(error); process.exit(3); } })"
+  ], { cwd: temp, encoding: 'utf8' });
+  assert.equal(privateImport.status, 0,
+    'Installed package unexpectedly exposed private dist subpath: ' +
+    privateImport.stdout + privateImport.stderr);
+
   const help = run(process.execPath, [join(installedDir, 'bin', 'credorewards.mjs'), '--help'], temp);
   assert.match(help, /Usage: credorewards/);
   const batchHelp = run(process.execPath,
