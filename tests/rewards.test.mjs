@@ -221,3 +221,20 @@ test('fractional cashback is rounded per transaction across calendar months', ()
     assert.deepEqual(earnedById, { jan: 0, feb: 0, mar: 1 });
   }
 });
+
+test('one-basis-point cashback rounds only at the exact 10000-paise boundary', () => {
+  const card = makeCard({ rules: [{ id: 'base', category: '*', rateBps: 1 }] });
+  const transactions = [
+    tx('below', 9999, '2026-01'),
+    tx('exact', 10000, '2026-02'),
+    tx('above', 10001, '2026-03')
+  ];
+  for (const input of [transactions, [...transactions].reverse()]) {
+    const result = calculateRewards(card, input, 2026);
+    assert.equal(result.totalSpendPaise, 30000);
+    assert.equal(result.totalRewardsPaise, 2);
+    assert.equal(result.netAnnualValuePaise, 2);
+    const earned = Object.fromEntries(result.transactions.map(t => [t.id, t.earnedPaise]));
+    assert.deepEqual(earned, { below: 0, exact: 1, above: 1 });
+  }
+});
