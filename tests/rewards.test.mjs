@@ -196,5 +196,10 @@ test('fee-waiver eligible spend and net value are input-order invariant', () => 
   assert.equal(forward.annualFeeChargedPaise, 0);
   assert.equal(forward.totalRewardsPaise, 2);
   assert.equal(forward.netAnnualValuePaise, 2);
-  assert.deepEqual(reverse, forward);
+  // Transaction ledgers may preserve caller input order; compare by stable ID.
+  const normalize = ({ transactions: ledger, ...totals }) => ({
+    ...totals,
+    transactions: [...ledger].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  });
+  assert.deepEqual(normalize(reverse), normalize(forward));
 });
