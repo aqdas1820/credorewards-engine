@@ -57,3 +57,10 @@ test('npm files allowlist excludes repository-only and secret-bearing paths', ()
   assert.deepEqual([...manifest.files].sort(),
     ['dist', 'bin', 'README.md', 'LICENSE', 'schemas'].sort());
 });
+
+test('npm cannot implicitly expose an entire directory as CLI commands', () => {
+  // npm supports directories.bin as an alternative to explicit bin mappings.
+  // Keep command exposure limited to the individually reviewed manifest.bin entries.
+  assert.equal(Object.hasOwn(manifest.directories ?? {}, 'bin'), false,
+    'Unexpected implicit npm CLI command directory');
+});
