@@ -101,6 +101,14 @@ try {
     'Installed package unexpectedly exposed private dist subpath: ' +
     privateImport.stdout + privateImport.stderr);
 
+  // CommonJS consumers must receive the same private-subpath boundary as ESM.
+  const privateRequire = spawnSync(process.execPath, ['-e',
+    "try { require('@credonomics/rewards-engine/dist/index.js'); process.exit(2); } catch (error) { if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') { console.error(error); process.exit(3); } }"
+  ], { cwd: temp, encoding: 'utf8' });
+  assert.equal(privateRequire.status, 0,
+    'CommonJS consumer unexpectedly exposed private dist subpath: ' +
+    privateRequire.stdout + privateRequire.stderr);
+
   const help = run(process.execPath, [join(installedDir, 'bin', 'credorewards.mjs'), '--help'], temp);
   assert.match(help, /Usage: credorewards/);
   const batchHelp = run(process.execPath,
