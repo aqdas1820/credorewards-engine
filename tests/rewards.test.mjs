@@ -194,8 +194,9 @@ test('fee-waiver eligible spend and net value are input-order invariant', () => 
   assert.equal(forward.feeWaiverEligibleSpendPaise, 1000);
   assert.equal(forward.annualFeeWaived, true);
   assert.equal(forward.annualFeeChargedPaise, 0);
-  assert.equal(forward.totalRewardsPaise, 2);
-  assert.equal(forward.netAnnualValuePaise, 2);
+  // Rent is excluded from fee-waiver spend, not from cashback.
+  assert.equal(forward.totalRewardsPaise, 52);
+  assert.equal(forward.netAnnualValuePaise, 52);
   // Transaction ledgers may preserve caller input order; compare by stable ID.
   const normalize = ({ transactions: ledger, ...totals }) => ({
     ...totals,
