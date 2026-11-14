@@ -80,7 +80,7 @@ test('published SDK export targets resolve to regular package-local files', () =
   targets.push(manifest.main, manifest.types);
   assert.ok(targets.length >= 4, 'Expected SDK export targets');
   for (const target of targets) {
-    assert.match(target, /^(?:\\.\\/)?[a-zA-Z0-9_-]+(?:\\/[a-zA-Z0-9_.-]+)*$/,
+    assert.match(target, /^(?:\.\/)?[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_.-]+)*$/,
       `Unsafe export target: ${target}`);
     const filePath = fileURLToPath(new URL(target.startsWith('./') ? target : `./${target}`,
       new URL('../', import.meta.url)));
