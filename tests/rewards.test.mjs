@@ -147,3 +147,32 @@ test('rejects aggregate paise totals outside safe integer range', () => {
     /totalSpendPaise exceeds safe integer range/
   );
 });
+
+
+test('fee waiver boundary uses eligible paise, not total or rewarded spend', () => {
+  const card = makeCard({
+    annualFeePaise: 250,
+    annualFeeWaiverThresholdPaise: 1000,
+    excludedCategories: ['utilities'],
+    feeWaiverExcludedCategories: ['rent']
+  });
+  const base = [
+    tx('rent', 5000, '2026-01', 'rent'),
+    tx('utilities', 999, '2026-01', 'utilities')
+  ];
+  const below = calculateRewards(card, base, 2026);
+  assert.equal(below.totalSpendPaise, 5999);
+  assert.equal(below.feeWaiverEligibleSpendPaise, 999);
+  assert.equal(below.annualFeeWaived, false);
+  assert.equal(below.annualFeeChargedPaise, 250);
+  assert.equal(below.netAnnualValuePaise, below.totalRewardsPaise - 250);
+
+  const atThreshold = calculateRewards(card, [
+    base[0], { ...base[1], amountPaise: 1000 }
+  ], 2026);
+  assert.equal(atThreshold.feeWaiverEligibleSpendPaise, 1000);
+  assert.equal(atThreshold.annualFeeWaived, true);
+  assert.equal(atThreshold.annualFeeChargedPaise, 0);
+  assert.equal(atThreshold.netAnnualValuePaise, atThreshold.totalRewardsPaise);
+  assert.equal(atThreshold.transactions.find(t => t.id === 'utilities').reason, 'excluded_category');
+});
