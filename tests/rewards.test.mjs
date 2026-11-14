@@ -204,3 +204,20 @@ test('fee-waiver eligible spend and net value are input-order invariant', () => 
   });
   assert.deepEqual(normalize(reverse), normalize(forward));
 });
+
+test('fractional cashback is rounded per transaction across calendar months', () => {
+  const card = makeCard();
+  const transactions = [
+    tx('jan', 99, '2026-01'),
+    tx('feb', 99, '2026-02'),
+    tx('mar', 100, '2026-03')
+  ];
+  for (const input of [transactions, [...transactions].reverse()]) {
+    const result = calculateRewards(card, input, 2026);
+    assert.equal(result.totalSpendPaise, 298);
+    assert.equal(result.totalRewardsPaise, 1);
+    assert.equal(result.netAnnualValuePaise, 1);
+    const earnedById = Object.fromEntries(result.transactions.map(t => [t.id, t.earnedPaise]));
+    assert.deepEqual(earnedById, { jan: 0, feb: 0, mar: 1 });
+  }
+});
