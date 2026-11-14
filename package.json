@@ -46,7 +46,7 @@
     "verify:release": "npm run typecheck && npm test && npm run test:package && npm run validate:catalog && npm pack --dry-run --ignore-scripts"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^7.0.2"
   },
   "keywords": [
     "fintech",
