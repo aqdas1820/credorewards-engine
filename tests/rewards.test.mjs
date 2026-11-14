@@ -176,3 +176,31 @@ test('fee waiver boundary uses eligible paise, not total or rewarded spend', () 
   assert.equal(atThreshold.netAnnualValuePaise, atThreshold.totalRewardsPaise);
   assert.equal(atThreshold.transactions.find(t => t.id === 'utilities').reason, 'excluded_category');
 });
+
+test('fee-waiver eligible spend and net value are input-order invariant', () => {
+  const card = makeCard({
+    annualFeePaise: 250,
+    annualFeeWaiverThresholdPaise: 1000,
+    excludedCategories: ['utilities'],
+    feeWaiverExcludedCategories: ['rent']
+  });
+  const transactions = [
+    tx('rent', 5000, '2026-01', 'rent'),
+    tx('utilities', 750, '2026-02', 'utilities'),
+    tx('grocery', 250, '2026-03', 'grocery')
+  ];
+  const forward = calculateRewards(card, transactions, 2026);
+  const reverse = calculateRewards(card, [...transactions].reverse(), 2026);
+  assert.equal(forward.feeWaiverEligibleSpendPaise, 1000);
+  assert.equal(forward.annualFeeWaived, true);
+  assert.equal(forward.annualFeeChargedPaise, 0);
+  // Rent is excluded from fee-waiver spend, not from cashback.
+  assert.equal(forward.totalRewardsPaise, 52);
+  assert.equal(forward.netAnnualValuePaise, 52);
+  // Transaction ledgers may preserve caller input order; compare by stable ID.
+  const normalize = ({ transactions: ledger, ...totals }) => ({
+    ...totals,
+    transactions: [...ledger].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  });
+  assert.deepEqual(normalize(reverse), normalize(forward));
+});
