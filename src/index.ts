@@ -178,7 +178,12 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   let totalRewards = 0n;
 
   // Avoid caller ordering affecting monthly caps. Order by month, then transaction ID.
-  const ordered = transactions.slice().sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
+  // Copy validated own indexed entries without invoking caller-controlled array methods.
+  // Array.prototype.slice on an untrusted array could be overridden to inject
+  // transactions that were never validated.
+  const ordered: Transaction[] = [];
+  for (let i = 0; i < transactions.length; i++) ordered.push(transactions[i]!);
+  ordered.sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
   for (const tx of ordered) {
     const amount = BigInt(tx.amountPaise);
     totalSpend += amount;
