@@ -194,7 +194,17 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
       continue;
     }
     // Rules are deliberately ordered: specific categories should precede wildcard.
-    const rule = card.rules.find(r => r.category === tx.category || r.category === '*');
+    // Read validated own rule slots without invoking caller-overridden find().
+    // A custom find() could substitute a rule that was never validated.
+    let rule: CashbackRule | undefined;
+    for (let index = 0; index < card.rules.length; index++) {
+      if (!Object.prototype.hasOwnProperty.call(card.rules, index)) throw new Error('invalid rule');
+      const candidate = card.rules[index]!;
+      if (candidate.category === tx.category || candidate.category === '*') {
+        rule = candidate;
+        break;
+      }
+    }
     if (!rule) {
       results.push({ ...base, matchedRuleId: null, earnedPaise: 0, reason: 'no_matching_rule' });
       continue;
