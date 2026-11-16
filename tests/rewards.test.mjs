@@ -147,3 +147,94 @@ test('rejects aggregate paise totals outside safe integer range', () => {
     /totalSpendPaise exceeds safe integer range/
   );
 });
+
+
+test('fee waiver boundary uses eligible paise, not total or rewarded spend', () => {
+  const card = makeCard({
+    annualFeePaise: 250,
+    annualFeeWaiverThresholdPaise: 1000,
+    excludedCategories: ['utilities'],
+    feeWaiverExcludedCategories: ['rent']
+  });
+  const base = [
+    tx('rent', 5000, '2026-01', 'rent'),
+    tx('utilities', 999, '2026-01', 'utilities')
+  ];
+  const below = calculateRewards(card, base, 2026);
+  assert.equal(below.totalSpendPaise, 5999);
+  assert.equal(below.feeWaiverEligibleSpendPaise, 999);
+  assert.equal(below.annualFeeWaived, false);
+  assert.equal(below.annualFeeChargedPaise, 250);
+  assert.equal(below.netAnnualValuePaise, below.totalRewardsPaise - 250);
+
+  const atThreshold = calculateRewards(card, [
+    base[0], { ...base[1], amountPaise: 1000 }
+  ], 2026);
+  assert.equal(atThreshold.feeWaiverEligibleSpendPaise, 1000);
+  assert.equal(atThreshold.annualFeeWaived, true);
+  assert.equal(atThreshold.annualFeeChargedPaise, 0);
+  assert.equal(atThreshold.netAnnualValuePaise, atThreshold.totalRewardsPaise);
+  assert.equal(atThreshold.transactions.find(t => t.id === 'utilities').reason, 'excluded_category');
+});
+
+test('fee-waiver eligible spend and net value are input-order invariant', () => {
+  const card = makeCard({
+    annualFeePaise: 250,
+    annualFeeWaiverThresholdPaise: 1000,
+    excludedCategories: ['utilities'],
+    feeWaiverExcludedCategories: ['rent']
+  });
+  const transactions = [
+    tx('rent', 5000, '2026-01', 'rent'),
+    tx('utilities', 750, '2026-02', 'utilities'),
+    tx('grocery', 250, '2026-03', 'grocery')
+  ];
+  const forward = calculateRewards(card, transactions, 2026);
+  const reverse = calculateRewards(card, [...transactions].reverse(), 2026);
+  assert.equal(forward.feeWaiverEligibleSpendPaise, 1000);
+  assert.equal(forward.annualFeeWaived, true);
+  assert.equal(forward.annualFeeChargedPaise, 0);
+  // Rent is excluded from fee-waiver spend, not from cashback.
+  assert.equal(forward.totalRewardsPaise, 52);
+  assert.equal(forward.netAnnualValuePaise, 52);
+  // Transaction ledgers may preserve caller input order; compare by stable ID.
+  const normalize = ({ transactions: ledger, ...totals }) => ({
+    ...totals,
+    transactions: [...ledger].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  });
+  assert.deepEqual(normalize(reverse), normalize(forward));
+});
+
+test('fractional cashback is rounded per transaction across calendar months', () => {
+  const card = makeCard();
+  const transactions = [
+    tx('jan', 99, '2026-01'),
+    tx('feb', 99, '2026-02'),
+    tx('mar', 100, '2026-03')
+  ];
+  for (const input of [transactions, [...transactions].reverse()]) {
+    const result = calculateRewards(card, input, 2026);
+    assert.equal(result.totalSpendPaise, 298);
+    assert.equal(result.totalRewardsPaise, 1);
+    assert.equal(result.netAnnualValuePaise, 1);
+    const earnedById = Object.fromEntries(result.transactions.map(t => [t.id, t.earnedPaise]));
+    assert.deepEqual(earnedById, { jan: 0, feb: 0, mar: 1 });
+  }
+});
+
+test('one-basis-point cashback rounds only at the exact 10000-paise boundary', () => {
+  const card = makeCard({ rules: [{ id: 'base', category: '*', rateBps: 1 }] });
+  const transactions = [
+    tx('below', 9999, '2026-01'),
+    tx('exact', 10000, '2026-02'),
+    tx('above', 10001, '2026-03')
+  ];
+  for (const input of [transactions, [...transactions].reverse()]) {
+    const result = calculateRewards(card, input, 2026);
+    assert.equal(result.totalSpendPaise, 30000);
+    assert.equal(result.totalRewardsPaise, 2);
+    assert.equal(result.netAnnualValuePaise, 2);
+    const earned = Object.fromEntries(result.transactions.map(t => [t.id, t.earnedPaise]));
+    assert.deepEqual(earned, { below: 0, exact: 1, above: 1 });
+  }
+});

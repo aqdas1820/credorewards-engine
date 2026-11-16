@@ -128,9 +128,9 @@ function validateTerms(card: CardTerms): void {
   if (!Array.isArray(card.rules)) throw new Error('card.rules must be an array');
   const ruleIds = new Set<string>();
   for (let index = 0; index < card.rules.length; index++) {
-    // Validate actual own slots; for..of can be overridden to hide malformed rules.
+    // Validate own indexed slots; custom iterators can conceal invalid rules.
     if (!Object.prototype.hasOwnProperty.call(card.rules, index)) throw new Error('invalid rule');
-    const rule = card.rules[index];
+    const rule = card.rules[index]!;
     if (!rule || typeof rule !== 'object') throw new Error('invalid rule');
     requireString(rule.id, 'rule.id');
     requireString(rule.category, `rule[${rule.id}].category`);
@@ -152,7 +152,10 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   if (!Number.isInteger(year) || year < 2000 || year > 2100) throw new Error('year must be an integer 2000–2100');
   if (!Array.isArray(transactions)) throw new Error('transactions must be an array');
   const seen = new Set<string>();
-  for (const tx of transactions) {
+  for (let index = 0; index < transactions.length; index++) {
+    // Inspect own indexed entries; caller-defined iterators can conceal invalid transactions.
+    if (!Object.prototype.hasOwnProperty.call(transactions, index)) throw new Error('invalid transaction');
+    const tx = transactions[index]!;
     if (!tx || typeof tx !== 'object') throw new Error('invalid transaction');
     requireString(tx.id, 'transaction.id');
     requireString(tx.category, `transaction[${tx.id}].category`);
@@ -178,7 +181,12 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
   let totalRewards = 0n;
 
   // Avoid caller ordering affecting monthly caps. Order by month, then transaction ID.
-  const ordered = [...transactions].sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
+  // Copy validated own indexed entries without invoking caller-controlled array methods.
+  // Array.prototype.slice on an untrusted array could be overridden to inject
+  // transactions that were never validated.
+  const ordered: Transaction[] = [];
+  for (let i = 0; i < transactions.length; i++) ordered.push(transactions[i]!);
+  ordered.sort((a, b) => a.month.localeCompare(b.month) || a.id.localeCompare(b.id));
   for (const tx of ordered) {
     const amount = BigInt(tx.amountPaise);
     totalSpend += amount;
@@ -189,7 +197,17 @@ export function calculateRewards(card: CardTerms, transactions: Transaction[], y
       continue;
     }
     // Rules are deliberately ordered: specific categories should precede wildcard.
-    const rule = card.rules.find(r => r.category === tx.category || r.category === '*');
+    // Read validated own rule slots without invoking caller-overridden find().
+    // A custom find() could substitute a rule that was never validated.
+    let rule: CashbackRule | undefined;
+    for (let index = 0; index < card.rules.length; index++) {
+      if (!Object.prototype.hasOwnProperty.call(card.rules, index)) throw new Error('invalid rule');
+      const candidate = card.rules[index]!;
+      if (candidate.category === tx.category || candidate.category === '*') {
+        rule = candidate;
+        break;
+      }
+    }
     if (!rule) {
       results.push({ ...base, matchedRuleId: null, earnedPaise: 0, reason: 'no_matching_rule' });
       continue;
@@ -286,7 +304,10 @@ export function compareCards(
   const cardIds = new Set<string>();
   const scored: { card: CardTerms; calculation: CalculationResult }[] = [];
 
-  for (const card of cards) {
+  for (let index = 0; index < cards.length; index++) {
+    // Reject sparse/inherited slots and do not trust caller-defined array iterators.
+    if (!Object.prototype.hasOwnProperty.call(cards, index)) throw new Error('invalid card');
+    const card = cards[index]!;
     const calculation = calculateRewards(card, transactions, year);
     if (cardIds.has(calculation.cardId)) {
       throw new Error('duplicate card id: ' + calculation.cardId);
@@ -374,7 +395,17 @@ export function compareCatalogCards(
   if (!Array.isArray(cardIds) || cardIds.length < 2) {
     throw new Error('cardIds must contain at least two card IDs');
   }
-  const resolved = cardIds.map(cardId => resolveAnnualCardTerms(catalog, cardId, year, options));
+  // Validate own indexed entries before catalog resolution. Array.map skips holes,
+  // and an instance override could replace or conceal caller-supplied IDs.
+  const validatedIds: string[] = [];
+  for (let index = 0; index < cardIds.length; index++) {
+    if (!Object.prototype.hasOwnProperty.call(cardIds, index) ||
+        typeof cardIds[index] !== 'string' || !cardIds[index]!.trim()) {
+      throw new Error('cardIds must contain non-empty card IDs');
+    }
+    validatedIds.push(cardIds[index]!);
+  }
+  const resolved = validatedIds.map(cardId => resolveAnnualCardTerms(catalog, cardId, year, options));
   const comparison = compareCards(resolved.map(revision => revision.terms), transactions, year);
   const selections = comparison.entries.map((entry): CatalogComparisonSelection => {
     const revision = resolved.find(candidate => candidate.terms.id === entry.cardId);

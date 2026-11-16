@@ -92,6 +92,35 @@ try {
     assert.match(helpFromShim, new RegExp('Usage: ' + command));
   }
 
+  // Verify the installed package's exports boundary from a real consumer.
+  // Internal build files must not be deep-importable by package specifier.
+  const privateImport = spawnSync(process.execPath, ['--input-type=module', '-e',
+    "import('@credonomics/rewards-engine/dist/index.js').then(() => process.exit(2), error => { if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') { console.error(error); process.exit(3); } })"
+  ], { cwd: temp, encoding: 'utf8' });
+  assert.equal(privateImport.status, 0,
+    'Installed package unexpectedly exposed private dist subpath: ' +
+    privateImport.stdout + privateImport.stderr);
+
+  // CommonJS consumers must receive the same private-subpath boundary as ESM.
+  const privateRequire = spawnSync(process.execPath, ['-e',
+    "try { require('@credonomics/rewards-engine/dist/index.js'); process.exit(2); } catch (error) { if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') { console.error(error); process.exit(3); } }"
+  ], { cwd: temp, encoding: 'utf8' });
+  assert.equal(privateRequire.status, 0,
+    'CommonJS consumer unexpectedly exposed private dist subpath: ' +
+    privateRequire.stdout + privateRequire.stderr);
+
+  // Package metadata is intentionally not a public exports subpath. Consumers
+  // should use the supported API rather than relying on internal manifest shape.
+  for (const mode of ['import', 'require']) {
+    const script = mode === 'import'
+      ? "import('@credonomics/rewards-engine/package.json').then(() => process.exit(2), error => { if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') { console.error(error); process.exit(3); } })"
+      : "try { require('@credonomics/rewards-engine/package.json'); process.exit(2); } catch (error) { if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') { console.error(error); process.exit(3); } }";
+    const args = mode === 'import' ? ['--input-type=module', '-e', script] : ['-e', script];
+    const result = spawnSync(process.execPath, args, { cwd: temp, encoding: 'utf8' });
+    assert.equal(result.status, 0,
+      mode + ' unexpectedly exposed private package.json: ' + result.stdout + result.stderr);
+  }
+
   const help = run(process.execPath, [join(installedDir, 'bin', 'credorewards.mjs'), '--help'], temp);
   assert.match(help, /Usage: credorewards/);
   const batchHelp = run(process.execPath,
