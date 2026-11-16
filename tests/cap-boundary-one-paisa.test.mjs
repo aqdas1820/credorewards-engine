@@ -29,7 +29,7 @@ test('monthly cap allocates the final paisa exactly once, independent of input o
   const reversed = calculateRewards(card, [...transactions].reverse(), 2026);
   assert.deepEqual(forward, reversed);
   assert.equal(forward.totalRewardsPaise, 101);
-  assert.equal(forward.transactions.reduce((sum, item) => sum + item.rewardPaise, 0), 101);
+  assert.equal(forward.transactions.reduce((sum, item) => sum + item.earnedPaise, 0), 101);
 });
 
 test('annual cap consumes only one final paisa in a later month', () => {
@@ -41,6 +41,6 @@ test('annual cap consumes only one final paisa in a later month', () => {
   const result = calculateRewards(card, transactions, 2026);
   assert.equal(result.totalRewardsPaise, 202);
   assert.equal(result.netAnnualValuePaise, 202);
-  assert.equal(result.transactions.reduce((sum, item) => sum + item.rewardPaise, 0), 202);
+  assert.equal(result.transactions.reduce((sum, item) => sum + item.earnedPaise, 0), 202);
   assert.deepEqual(result, calculateRewards(card, [...transactions].reverse(), 2026));
 });
