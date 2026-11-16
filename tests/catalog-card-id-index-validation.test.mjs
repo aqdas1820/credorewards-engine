@@ -6,12 +6,10 @@ test('catalog comparison rejects sparse and inherited card ID slots before resol
   const ids = ['card-a', 'card-b'];
   delete ids[1];
   assert.throws(() => compareCatalogCards(undefined, ids, [], 2026), /cardIds must contain non-empty card IDs/);
-  Array.prototype[1] = 'inherited-card';
-  try {
-    assert.throws(() => compareCatalogCards(undefined, ids, [], 2026), /cardIds must contain non-empty card IDs/);
-  } finally {
-    delete Array.prototype[1];
-  }
+  const inherited = Object.create(Array.prototype);
+  inherited[1] = 'inherited-card';
+  Object.setPrototypeOf(ids, inherited);
+  assert.throws(() => compareCatalogCards(undefined, ids, [], 2026), /cardIds must contain non-empty card IDs/);
 });
 
 test('catalog comparison does not execute caller-controlled card ID map', () => {
