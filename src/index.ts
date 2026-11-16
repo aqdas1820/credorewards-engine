@@ -382,7 +382,17 @@ export function compareCatalogCards(
   if (!Array.isArray(cardIds) || cardIds.length < 2) {
     throw new Error('cardIds must contain at least two card IDs');
   }
-  const resolved = cardIds.map(cardId => resolveAnnualCardTerms(catalog, cardId, year, options));
+  // Validate own indexed entries before catalog resolution. Array.map skips holes,
+  // and an instance override could replace or conceal caller-supplied IDs.
+  const validatedIds: string[] = [];
+  for (let index = 0; index < cardIds.length; index++) {
+    if (!Object.prototype.hasOwnProperty.call(cardIds, index) ||
+        typeof cardIds[index] !== 'string' || !cardIds[index]!.trim()) {
+      throw new Error('cardIds must contain non-empty card IDs');
+    }
+    validatedIds.push(cardIds[index]!);
+  }
+  const resolved = validatedIds.map(cardId => resolveAnnualCardTerms(catalog, cardId, year, options));
   const comparison = compareCards(resolved.map(revision => revision.terms), transactions, year);
   const selections = comparison.entries.map((entry): CatalogComparisonSelection => {
     const revision = resolved.find(candidate => candidate.terms.id === entry.cardId);
