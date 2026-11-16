@@ -20,7 +20,7 @@ test('prototype-like rule and transaction IDs retain independent capped ledgers'
   const transactions = [
     { id: '__proto__', month: '2026-01', category: 'groceries', amountPaise: 10000 },
     { id: 'constructor', month: '2026-01', category: 'groceries', amountPaise: 10000 },
-    { id: 'toString', month: '2026-01', category: 'other', amountPaise: 10000 },
+    { id: 'toString', month: '2026-01', category: 'toString', amountPaise: 10000 },
     { id: 'hasOwnProperty', month: '2026-01', category: 'constructor', amountPaise: 10000 }
   ];
   const result = calculateRewards(card, transactions, 2026);
