@@ -39,3 +39,32 @@ test('safe integer boundary remains representable without overflow', () => {
   assert.equal(result.feeWaiverEligibleSpendPaise, Number.MAX_SAFE_INTEGER);
   assert.equal(result.totalRewardsPaise, 0);
 });
+
+
+test('comparison gap exceeding safe integer range fails closed', async () => {
+  const { compareCards } = await import('../dist/index.js');
+  const card = (id, annualFeePaise, rateBps) => ({
+    id, name: `Fictional ${id}`, annualFeePaise,
+    rules: [{ id: 'base', category: '*', rateBps }]
+  });
+  const cards = [card('full-reward', 0, 10000), card('full-fee', Number.MAX_SAFE_INTEGER, 0)];
+  const transactions = [{ id: 'synthetic', month: '2026-01', category: 'general', amountPaise: Number.MAX_SAFE_INTEGER }];
+  const originalCards = structuredClone(cards);
+  const originalTransactions = structuredClone(transactions);
+  assert.throws(() => compareCards(cards, transactions, 2026), /differenceFromLeaderPaise exceeds safe integer range/);
+  assert.deepEqual(cards, originalCards);
+  assert.deepEqual(transactions, originalTransactions);
+});
+
+test('comparison gap at exact safe integer boundary remains representable', async () => {
+  const { compareCards } = await import('../dist/index.js');
+  const card = (id, annualFeePaise) => ({
+    id, name: `Fictional ${id}`, annualFeePaise,
+    rules: [{ id: 'base', category: '*', rateBps: 0 }]
+  });
+  const result = compareCards([card('zero-fee', 0), card('maximum-fee', Number.MAX_SAFE_INTEGER)], [], 2026);
+  assert.deepEqual(result.leaderCardIds, ['zero-fee']);
+  assert.equal(result.entries[0].differenceFromLeaderPaise, 0);
+  assert.equal(result.entries[1].differenceFromLeaderPaise, Number.MAX_SAFE_INTEGER);
+  assert.equal(result.entries[1].netAnnualValuePaise, -Number.MAX_SAFE_INTEGER);
+});
