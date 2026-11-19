@@ -25,11 +25,15 @@ test('comparison gap at maximum safe integer remains exact', () => {
 });
 
 test('comparison rejects a leader gap exceeding safe integer range', () => {
+  const beforeTransactions = structuredClone(transactions);
   for (const cards of [
     [card('full', 0, 10000), card('fee', max, 0)],
     [card('fee', max, 0), card('full', 0, 10000)]
   ]) {
+    const beforeCards = structuredClone(cards);
     assert.throws(() => compareCards(cards, transactions, 2026),
       /differenceFromLeaderPaise exceeds safe integer range/);
+    assert.deepEqual(cards, beforeCards);
+    assert.deepEqual(transactions, beforeTransactions);
   }
 });
