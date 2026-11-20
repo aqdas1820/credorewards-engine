@@ -68,7 +68,10 @@ export function summarizeStatementCycleSpend(
 
   const seen = new Set<string>();
   const buckets = new Map<string, { count: number; total: bigint; ids: string[] }>();
-  for (const tx of transactions) {
+  for (let index = 0; index < transactions.length; index += 1) {
+    // A missing own slot must not be filled by an inherited array property.
+    if (!Object.hasOwn(transactions, index)) throw new Error('invalid dated transaction');
+    const tx = transactions[index];
     if (!tx || typeof tx !== 'object') throw new Error('invalid dated transaction');
     if (typeof tx.id !== 'string' || !tx.id.trim()) {
       throw new Error('transaction.id must be a non-empty string');
