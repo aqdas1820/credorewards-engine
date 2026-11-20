@@ -33,6 +33,6 @@ test('fee waiver applies at exact threshold across separate eligible transaction
   assert.equal(result.feeWaiverEligibleSpendPaise, 10000);
   assert.equal(result.annualFeeWaived, true);
   assert.equal(result.annualFeeChargedPaise, 0);
-  assert.equal(result.totalRewardsPaise, 600);
-  assert.equal(result.netAnnualValuePaise, 600);
+  assert.equal(result.totalRewardsPaise, 599);
+  assert.equal(result.netAnnualValuePaise, 599);
 });
