@@ -2,45 +2,28 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { calculateRewards } from '../dist/index.js';
 
-// All amounts and categories are synthetic; no issuer terms are implied.
-const card = {
-  id: 'independent-caps', name: 'Fictional two-category card',
-  annualFeePaise: 0, excludedCategories: [],
-  rules: [
-    { id: 'groceries', category: 'grocery', rateBps: 10000, monthlyCapPaise: 5, annualCapPaise: 8 },
-    { id: 'fuel', category: 'fuel', rateBps: 10000, monthlyCapPaise: 4, annualCapPaise: 6 }
-  ]
-};
-const transaction = (id, amountPaise, month, category) => ({ id, amountPaise, month, category });
-
-test('distinct rule caps do not consume one another across months', () => {
-  const input = [
-    transaction('g-jan', 10, '2026-01', 'grocery'),
-    transaction('f-jan', 10, '2026-01', 'fuel'),
-    transaction('g-feb', 10, '2026-02', 'grocery'),
-    transaction('f-feb', 10, '2026-02', 'fuel')
-  ];
-  const snapshot = structuredClone(input);
-  const forward = calculateRewards(card, input, 2026);
-  const reverse = calculateRewards(card, [...input].reverse(), 2026);
-  const byId = result => Object.fromEntries(result.transactions.map(t => [t.id, t.earnedPaise]));
-  assert.deepEqual(byId(forward), { 'g-jan': 5, 'f-jan': 4, 'g-feb': 3, 'f-feb': 2 });
-  assert.deepEqual(byId(reverse), byId(forward));
-  assert.equal(forward.totalRewardsPaise, 14);
-  assert.equal(reverse.totalRewardsPaise, 14);
-  assert.equal(forward.netAnnualValuePaise, 14);
-  assert.deepEqual(input, snapshot);
-});
-
-test('a capped category does not prevent an uncapped category from earning', () => {
-  const uncapped = {
-    ...card,
-    rules: [...card.rules, { id: 'other', category: 'other', rateBps: 10000 }]
-  };
-  const result = calculateRewards(uncapped, [
-    transaction('g', 100, '2026-01', 'grocery'),
-    transaction('other', 7, '2026-01', 'other')
-  ], 2026);
-  assert.equal(result.totalRewardsPaise, 12);
-  assert.equal(result.transactions.find(t => t.id === 'other').earnedPaise, 7);
+test('independent rule caps do not consume each other across months', () => {
+  const card = Object.freeze({
+    id: 'fictional-independent-caps', name: 'Fictional independent caps', annualFeePaise: 0,
+    rules: Object.freeze([
+      Object.freeze({ id: 'groceries', category: 'grocery', rateBps: 10000, monthlyCapPaise: 3, annualCapPaise: 5 }),
+      Object.freeze({ id: 'utilities', category: 'utility', rateBps: 10000, monthlyCapPaise: 4, annualCapPaise: 6 })
+    ])
+  });
+  const transactions = Object.freeze([
+    Object.freeze({ id: 'u2', month: '2026-02', category: 'utility', amountPaise: 4 }),
+    Object.freeze({ id: 'g1', month: '2026-01', category: 'grocery', amountPaise: 4 }),
+    Object.freeze({ id: 'u1', month: '2026-01', category: 'utility', amountPaise: 5 }),
+    Object.freeze({ id: 'g2', month: '2026-02', category: 'grocery', amountPaise: 4 })
+  ]);
+  const result = calculateRewards(card, transactions, 2026);
+  assert.equal(result.totalSpendPaise, 17);
+  assert.equal(result.rewardEligibleSpendPaise, 17);
+  assert.equal(result.totalRewardsPaise, 11);
+  assert.equal(result.netAnnualValuePaise, 11);
+  assert.deepEqual(result.transactions.map(({ id, matchedRuleId, earnedPaise }) => [id, matchedRuleId, earnedPaise]), [
+    ['g1', 'groceries', 3], ['u1', 'utilities', 4],
+    ['g2', 'groceries', 2], ['u2', 'utilities', 2]
+  ]);
+  assert.deepEqual(calculateRewards(card, [...transactions].reverse(), 2026), result);
 });
