@@ -45,7 +45,7 @@ test('catalog CLI reports each invalid file and exits nonzero without stack trac
     const malformed = join(dir, 'malformed.json');
     const invalid = join(dir, 'invalid.json');
     writeFileSync(malformed, '{');
-    writeFileSync(invalid, JSON.stringify({ schemaVersion: 1, revisions: [] }));
+    writeFileSync(invalid, JSON.stringify({ schemaVersion: 1, revisions: 'not-an-array' }));
     assert.equal(invoke(catalog, []).status, 2);
     assert.equal(invoke(catalog, ['--help']).status, 0);
     const result = invoke(catalog, [malformed, invalid]);
