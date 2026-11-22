@@ -18,11 +18,19 @@ test('accepts a total spend exactly at the maximum safe integer', () => {
   assert.equal(result.totalRewardsPaise, 0);
 });
 
-test('rejects aggregate spend overflow even when individual amounts are safe', () => {
-  assert.throws(() => calculateRewards(card, [
+test('rejects aggregate spend overflow without mutating caller inputs', () => {
+  const transactions = [
     { id: 'a', month: '2026-01', category: 'other', amountPaise: Number.MAX_SAFE_INTEGER },
     { id: 'b', month: '2026-02', category: 'other', amountPaise: 1 }
-  ], 2026), /totalSpendPaise exceeds safe integer range/);
+  ];
+  const originalTransactions = structuredClone(transactions);
+  const originalCard = structuredClone(card);
+  assert.throws(
+    () => calculateRewards(card, transactions, 2026),
+    /totalSpendPaise exceeds safe integer range/
+  );
+  assert.deepEqual(transactions, originalTransactions);
+  assert.deepEqual(card, originalCard);
 });
 
 test('preserves maximum safe integer reward and fee-waiver totals', () => {
