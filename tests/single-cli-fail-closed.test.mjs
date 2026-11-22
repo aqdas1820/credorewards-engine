@@ -47,3 +47,32 @@ test('single-card CLI rejects unreadable and malformed input without success out
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('single-card CLI emits parseable deterministic JSON for a fictional valid input', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'credorewards-single-valid-'));
+  try {
+    const input = join(dir, 'fictional.json');
+    writeFileSync(input, JSON.stringify({
+      year: 2026,
+      card: {
+        id: 'fictional', name: 'Fictional Card', annualFeePaise: 0,
+        excludedCategories: [],
+        rules: [{ id: 'base', category: '*', rateBps: 100 }]
+      },
+      transactions: [
+        { id: 'tx-1', month: '2026-01', category: 'groceries', amountPaise: 10000 }
+      ]
+    }));
+    const first = invoke([input]);
+    const second = invoke([input]);
+    for (const result of [first, second]) {
+      assert.equal(result.status, 0);
+      assert.equal(result.stderr, '');
+      const report = JSON.parse(result.stdout);
+      assert.equal(report.totalRewardsPaise, 100);
+    }
+    assert.equal(first.stdout, second.stdout, 'CLI output must be deterministic');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
